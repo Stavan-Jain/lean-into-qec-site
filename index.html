@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lean into QEC: Machine Verification for Quantum Error Correction — Tutorial at IEEE Quantum Week 2026</title>
+<meta name="description" content="A half-day tutorial at IEEE Quantum Week 2026 (QCE26) on applying the Lean 4 proof assistant to quantum error correction.">
+
+<!-- Social preview. Update the URL + image once the site is live. -->
+<meta property="og:title" content="Lean into QEC: Machine Verification for Quantum Error Correction">
+<meta property="og:description" content="Half-day tutorial at IEEE Quantum Week 2026 (QCE26), Toronto — Sunday, September 13, 2026.">
+<meta property="og:type" content="website">
+
+<style>
+  :root {
+    --ink:        #16181d;
+    --ink-soft:   #4a5058;
+    --ink-faint:  #767d87;
+    --rule:       #e3e6ea;
+    --bg:         #ffffff;
+    --bg-soft:    #f7f8fa;
+    --accent:     #9b2226;   /* swap for your preferred accent */
+    --accent-bg:  #fdf3f3;
+    --maxw:       46rem;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    padding: 0 1.5rem 5rem;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; }
+
+  /* ---------- Header ---------- */
+
+  header { padding: 3.5rem 0 2rem; border-bottom: 1px solid var(--rule); }
+
+  .eyebrow {
+    font-size: .78rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 0 0 .9rem;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    margin: 0 0 .6rem;
+    font-weight: 700;
+  }
+
+  .subtitle { font-size: 1.05rem; color: var(--ink-soft); margin: 0; }
+
+  /* ---------- Section rhythm ---------- */
+
+  section { padding: 2.5rem 0 0; }
+
+  h2 {
+    font-size: .82rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-faint);
+    margin: 0 0 1rem;
+  }
+
+  h3 { font-size: 1.05rem; margin: 1.75rem 0 .5rem; font-weight: 650; }
+
+  p { margin: 0 0 1rem; }
+
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(155,34,38,.3); }
+  a:hover { border-bottom-color: var(--accent); }
+
+  .lede { font-size: 1.1rem; color: var(--ink); }
+
+  /* ---------- Key facts ---------- */
+
+  .facts {
+    margin: 0;
+    padding: 1.25rem 1.35rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: .55rem 1.5rem;
+  }
+  .facts dt {
+    font-size: .74rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-faint);
+    padding-top: .2rem;
+  }
+  .facts dd { margin: 0; }
+
+  /* ---------- Agenda table ---------- */
+
+  .agenda { width: 100%; border-collapse: collapse; font-size: .95rem; }
+
+  .agenda th {
+    text-align: left;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 700;
+    padding: 0 1rem .5rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .agenda td {
+    padding: .8rem 1rem .8rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  .agenda td:last-child, .agenda th:last-child { padding-right: 0; }
+
+  .agenda .time {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    width: 1%;
+  }
+
+  .agenda .session { font-weight: 600; }
+  .agenda .session .note { display: block; font-weight: 400; font-size: .88rem; color: var(--ink-soft); margin-top: .15rem; }
+  .agenda .who { color: var(--ink-soft); white-space: nowrap; }
+
+  /* Break rows: add class="break" to the <tr> */
+  .agenda tr.break td { background: var(--bg-soft); color: var(--ink-faint); font-style: italic; }
+  .agenda tr.break .session { font-weight: 500; }
+
+  /* ---------- Presenters ---------- */
+
+  .people { list-style: none; margin: 0; padding: 0; display: grid; gap: .85rem; }
+  .people li { display: flex; flex-wrap: wrap; gap: .1rem 0; flex-direction: column; }
+  .people .name { font-weight: 650; }
+  .people .affil { color: var(--ink-soft); font-size: .93rem; }
+
+  /* ---------- Links list ---------- */
+
+  .links { list-style: none; margin: 0; padding: 0; }
+  .links li { padding: .7rem 0; border-bottom: 1px solid var(--rule); }
+  .links li:first-child { padding-top: 0; }
+  .links .desc { display: block; color: var(--ink-soft); font-size: .93rem; margin-top: .15rem; }
+
+  /* ---------- Placeholder helper (delete .todo styling when done) ---------- */
+
+  .todo {
+    background: var(--accent-bg);
+    border: 1px dashed rgba(155,34,38,.4);
+    border-radius: 6px;
+    padding: .15rem .45rem;
+    color: var(--accent);
+    font-size: .9rem;
+  }
+
+  footer {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: .88rem;
+    color: var(--ink-faint);
+  }
+
+  /* On narrow screens the three-column agenda gets cramped, so each row
+     becomes a small stacked card instead. Nothing to edit here. */
+  @media (max-width: 34rem) {
+    .facts { grid-template-columns: 1fr; gap: .15rem; }
+    .facts dt { padding-top: .7rem; }
+
+    .agenda thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .agenda, .agenda tbody, .agenda tr, .agenda td { display: block; width: 100%; }
+    .agenda tr { padding: .85rem 0; border-bottom: 1px solid var(--rule); }
+    .agenda td { border: 0; padding: 0; }
+    .agenda .time { font-size: .82rem; letter-spacing: .03em; margin-bottom: .2rem; width: auto; }
+    .agenda .who { white-space: normal; font-size: .9rem; margin-top: .2rem; }
+    .agenda .who:empty { display: none; }
+    .agenda tr.break { padding-left: .75rem; padding-right: .75rem; border-radius: 6px; }
+    .agenda tr.break td { background: none; }
+    .agenda tr.break { background: var(--bg-soft); }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e9ecef; --ink-soft: #adb5bd; --ink-faint: #868e96;
+      --rule: #2b2f36; --bg: #14161a; --bg-soft: #1c1f25;
+      --accent: #ff8f8f; --accent-bg: #2a1c1d;
+    }
+    a { border-bottom-color: rgba(255,143,143,.35); }
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Tutorial &middot; IEEE Quantum Week 2026</p>
+  <h1>Lean into QEC: Machine Verification for Quantum Error Correction</h1>
+  <p class="subtitle">A half-day, hands-on tutorial at QCE26 &mdash; Metro Toronto Convention Centre, Toronto, Canada</p>
+</header>
+
+<!-- ============================================================
+     WHEN &amp; WHERE
+     ============================================================ -->
+<section id="details">
+  <h2>When &amp; Where</h2>
+  <dl class="facts">
+    <dt>Date</dt>
+    <dd>Sunday, September 13, 2026</dd>
+
+    <dt>Time</dt>
+    <dd>10:00 &ndash; 14:30 EDT</dd>
+
+    <dt>Room</dt>
+    <dd><span class="todo">TODO: room number once QCE26 announces it</span></dd>
+
+    <dt>Venue</dt>
+    <dd>Metro Toronto Convention Centre, Toronto, Ontario, Canada</dd>
+
+    <dt>Session ID</dt>
+    <dd>TUT&#8203;::QEC&#8203;::QSWE&#8203;::637</dd>
+  </dl>
+</section>
+
+<!-- ============================================================
+     OVERVIEW
+     ============================================================ -->
+<section id="overview">
+  <h2>Overview</h2>
+  <p class="lede">Attendees will learn how to apply the Lean&nbsp;4 proof assistant to quantum error correction, gaining practical skills in formal specification and mechanical verification of QEC protocols and fault-tolerant operations.</p>
+
+  <p>The promise of fault-tolerant quantum computing rests on the correctness of Quantum Error Correction (QEC) protocols &mdash; yet the proofs underlying key primitives such as lattice surgery and transversal gates often rely on informal arguments rather than rigorous formal justification. This &ldquo;trust gap&rdquo; means that a subtle error in the theoretical foundations of a QEC framework can propagate silently through an entire software and hardware stack.</p>
+
+  <p>This tutorial demonstrates how the Lean&nbsp;4 proof assistant can contribute to bridging this trust gap by providing a machine-checked foundation for QEC. Using the <strong>QuantumErrorCorrectionLean</strong> library as a concrete case study, we show how to translate informal protocol sketches into formal specifications. The library formalizes the stabilizer formalism and provides machine-checked implementations of several stabilizer codes, including their logical operators &mdash; moving QEC designs from the space of informal argument to mechanically verified proof.</p>
+
+  <p>Participants will gain hands-on experience formalizing QEC protocols in Lean&nbsp;4. The tutorial covers the essentials of Lean&nbsp;4's foundation, walks through verification of key quantum code properties and fault-tolerant reasoning, and closes with a discussion of how formal methods can integrate into the broader quantum computing research and development workflow. Attendees will leave equipped with the foundational skills to apply formal verification using Lean&nbsp;4 to their own QEC research.</p>
+</section>
+
+<!-- ============================================================
+     AGENDA  <<<  THIS IS THE PART YOU FILL IN  >>>
+     ------------------------------------------------------------
+     To add a normal session row, copy this block:
+
+         <tr>
+           <td class="time">10:00 &ndash; 10:20</td>
+           <td class="session">Session title
+             <span class="note">Optional one-line note. Delete this span if unused.</span>
+           </td>
+           <td class="who">Presenter Name</td>
+         </tr>
+
+     To add a break row, copy this block (note class="break"):
+
+         <tr class="break">
+           <td class="time">12:00 &ndash; 12:30</td>
+           <td class="session">Break</td>
+           <td class="who"></td>
+         </tr>
+     ============================================================ -->
+<section id="agenda">
+  <h2>Agenda</h2>
+  <table class="agenda">
+    <thead>
+      <tr>
+        <th scope="col">Time</th>
+        <th scope="col">Session</th>
+        <th scope="col">Presenter</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr>
+        <td class="time">10:00 &ndash; 10:00</td>
+        <td class="session"><span class="todo">TODO: session title</span></td>
+        <td class="who"><span class="todo">Name</span></td>
+      </tr>
+
+      <tr>
+        <td class="time">10:00 &ndash; 10:00</td>
+        <td class="session"><span class="todo">TODO: session title</span>
+          <span class="note">Optional one-line note &mdash; delete this line if you don't want notes.</span>
+        </td>
+        <td class="who"><span class="todo">Name</span></td>
+      </tr>
+
+      <tr class="break">
+        <td class="time">10:00 &ndash; 10:00</td>
+        <td class="session">Break</td>
+        <td class="who"></td>
+      </tr>
+
+      <tr>
+        <td class="time">10:00 &ndash; 10:00</td>
+        <td class="session"><span class="todo">TODO: session title</span></td>
+        <td class="who"><span class="todo">Name</span></td>
+      </tr>
+
+      <tr>
+        <td class="time">10:00 &ndash; 10:00</td>
+        <td class="session"><span class="todo">TODO: session title</span></td>
+        <td class="who"><span class="todo">Name</span></td>
+      </tr>
+
+      <tr>
+        <td class="time">14:15 &ndash; 14:30</td>
+        <td class="session"><span class="todo">TODO: wrap-up / discussion</span></td>
+        <td class="who"><span class="todo">Name</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     TARGET AUDIENCE
+     ============================================================ -->
+<section id="audience">
+  <h2>Who Should Attend</h2>
+  <p>This tutorial is intended for QEC researchers, graduate students, and quantum software developers who are familiar with the stabilizer formalism and basic QEC concepts, and who are comfortable with linear algebra and elementary group theory. <strong>No prior experience with proof assistants is required.</strong></p>
+  <p>Attendees will learn to encode QEC concepts as formal Lean&nbsp;4 definitions, construct proofs of protocol correctness, and use the QuantumErrorCorrectionLean library for their own formalization work.</p>
+</section>
+
+<!-- ============================================================
+     MATERIALS &amp; LINKS
+     ------------------------------------------------------------
+     Replace the href="#" values as things go live; delete any
+     row that doesn't end up applying.
+     ============================================================ -->
+<section id="materials">
+  <h2>Materials &amp; Links</h2>
+  <ul class="links">
+    <li>
+      <a href="#">QuantumErrorCorrectionLean</a>
+      <span class="desc">The Lean&nbsp;4 library used throughout the tutorial. <span class="todo">TODO: repo URL</span></span>
+    </li>
+    <li>
+      <a href="#">Slides</a>
+      <span class="desc"><span class="todo">TODO: link after the session (or &ldquo;posted here after the tutorial&rdquo;)</span></span>
+    </li>
+    <li>
+      <a href="#">Hands-on exercises</a>
+      <span class="desc"><span class="todo">TODO: link to the exercise repo / starter project</span></span>
+    </li>
+    <li>
+      <a href="#">Setup instructions</a>
+      <span class="desc"><span class="todo">TODO: Lean 4 + VS Code install steps, if you want attendees set up in advance</span></span>
+    </li>
+    <li>
+      <a href="https://qce.quantum.ieee.org/2026/qce26-schedule/tutorial-schedule/">QCE26 tutorial schedule</a>
+      <span class="desc">Official IEEE Quantum Week 2026 listing for this session.</span>
+    </li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     PRESENTERS
+     ============================================================ -->
+<section id="presenters">
+  <h2>Presenters</h2>
+  <ul class="people">
+    <li>
+      <span class="name"><a href="#">Stavan Sunil Jain</a></span>
+      <span class="affil">University of Wisconsin&ndash;Madison</span>
+    </li>
+    <li>
+      <span class="name"><a href="https://pages.cs.wisc.edu/~aws/">Aws Albarghouthi</a></span>
+      <span class="affil">University of Wisconsin&ndash;Madison</span>
+    </li>
+    <li>
+      <span class="name"><a href="#">Nithin Raveendran</a></span>
+      <span class="affil">University of Arizona</span>
+    </li>
+    <li>
+      <span class="name"><a href="https://swamittannu.com/">Swamit Tannu</a></span>
+      <span class="affil">University of Wisconsin&ndash;Madison</span>
+    </li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     CONTACT
+     ============================================================ -->
+<section id="contact">
+  <h2>Questions</h2>
+  <p>Questions about the tutorial before the session? Email <a href="mailto:stavansjain@gmail.com">Stavan Jain</a><span class="todo">TODO: swap in your institutional address if you'd rather use that</span>.</p>
+</section>
+
+<footer>
+  Tutorial at <a href="https://qce.quantum.ieee.org/2026/">IEEE Quantum Week 2026 (QCE26)</a>, September 13&ndash;18, 2026, Toronto, Canada.
+</footer>
+
+</div>
+</body>
+</html>
