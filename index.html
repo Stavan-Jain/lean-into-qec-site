@@ -158,6 +158,63 @@
   .links li:first-child { padding-top: 0; }
   .links .desc { display: block; color: var(--ink-soft); font-size: .93rem; margin-top: .15rem; }
 
+  /* ---------- Setup options ---------- */
+
+  .setup { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin: 0 0 1.25rem; }
+
+  .opt {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem 1.25rem;
+    background: var(--bg-soft);
+    display: flex;
+    flex-direction: column;
+    /* Grid and flex items default to min-width:auto, so they refuse to shrink
+       below their content — the long `git clone` URL in the <pre> below would
+       widen this card past the viewport and scroll the whole page sideways.
+       These let the card shrink so the <pre> scrolls on its own instead. */
+    min-width: 0;
+  }
+  .opt ol { min-width: 0; }
+  .opt h3 { margin: 0 0 .15rem; font-size: 1rem; }
+
+  /* The headline number: how long until you're actually running Lean. */
+  .opt .eta {
+    font-size: .74rem;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0 0 .7rem;
+  }
+  .opt .req { font-size: .88rem; color: var(--ink-soft); margin: 0 0 .7rem; }
+  .opt ol { margin: 0; padding-left: 1.1rem; font-size: .93rem; }
+  .opt ol li { margin-bottom: .4rem; }
+  .opt ol li:last-child { margin-bottom: 0; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .88em;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: .08em .35em;
+  }
+
+  pre {
+    margin: .5rem 0 0;
+    padding: .7rem .8rem;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow-x: auto;          /* long commands scroll, page never does */
+    font-size: .85rem;
+    line-height: 1.5;
+  }
+  pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+  .note-inline { font-size: .9rem; color: var(--ink-soft); margin: 0; }
+
   /* ---------- Placeholder helper (delete .todo styling when done) ---------- */
 
   .todo {
@@ -182,6 +239,8 @@
   @media (max-width: 34rem) {
     .facts { grid-template-columns: 1fr; gap: .15rem; }
     .facts dt { padding-top: .7rem; }
+
+    .setup { grid-template-columns: 1fr; }
 
     .agenda thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .agenda, .agenda tbody, .agenda tr, .agenda td { display: block; width: 100%; }
@@ -212,7 +271,6 @@
 <header>
   <p class="eyebrow">Tutorial &middot; IEEE Quantum Week 2026</p>
   <h1>Lean into QEC: Machine Verification for Quantum Error Correction</h1>
-  <p class="subtitle">A tutorial at QCE 2026 &mdash; Metro Toronto Convention Centre, Toronto</p>
 </header>
 
 <!-- ============================================================
@@ -226,31 +284,18 @@
 
     <dt>Time</dt>
     <dd>
-      <div>Session 1: 10:00 &ndash; 11:30</div>
-      <div>Session 2: 13:00 &ndash; 14:30</div>
+      <div>Session 1: 10:00 AM &ndash; 11:30 AM</div>
+      <div>Session 2: 1:00 PM &ndash; 2:30 PM</div>
     </dd>
 
     <dt>Room</dt>
-    <dd><span class="todo">TODO: room number once QCE26 announces it</span></dd>
+    <dd>TBD</dd>
 
     <dt>Venue</dt>
     <dd>Metro Toronto Convention Centre, Toronto</dd>
   </dl>
 </section>
 
-<!-- ============================================================
-     OVERVIEW
-     ============================================================ -->
-<section id="overview">
-  <h2>Overview</h2>
-  <p class="lede">Attendees will learn how to apply the Lean&nbsp;4 proof assistant to quantum error correction, gaining practical skills in formal specification and mechanical verification of QEC protocols and fault-tolerant operations.</p>
-
-  <p>The promise of fault-tolerant quantum computing rests on the correctness of Quantum Error Correction (QEC) protocols &mdash; yet the proofs underlying key primitives such as lattice surgery and transversal gates often rely on informal arguments rather than rigorous formal justification. This &ldquo;trust gap&rdquo; means that a subtle error in the theoretical foundations of a QEC framework can propagate silently through an entire software and hardware stack.</p>
-
-  <p>This tutorial demonstrates how the Lean&nbsp;4 proof assistant can contribute to bridging this trust gap by providing a machine-checked foundation for QEC. Using the <strong>QECLean</strong> library as a concrete case study, we show how to translate informal protocol sketches into formal specifications. The library formalizes the stabilizer formalism and provides machine-checked implementations of several stabilizer codes, including their logical operators &mdash; moving QEC designs from the space of informal argument to mechanically verified proof.</p>
-
-  <p>Participants will gain hands-on experience formalizing QEC protocols in Lean&nbsp;4. The tutorial covers the essentials of Lean&nbsp;4's foundation, walks through verification of key quantum code properties and fault-tolerant reasoning, and closes with a discussion of how formal methods can integrate into the broader quantum computing research and development workflow. Attendees will leave equipped with the foundational skills to apply formal verification using Lean&nbsp;4 to their own QEC research.</p>
-</section>
 
 <!-- ============================================================
      AGENDA  <<<  THIS IS THE PART YOU FILL IN  >>>
@@ -280,52 +325,60 @@
       <tr>
         <th scope="col">Time</th>
         <th scope="col">Session</th>
-        <th scope="col">Presenter</th>
       </tr>
     </thead>
     <tbody>
+        <tr>
+          <td class="time">10:00 AM &ndash; 10:30 AM</td>
+          <td class="session"> Introduction to Lean and Motivation for Formal Verification in Quantum Computing
+          </td>
+        </tr>
 
-      <tr>
-        <td class="time">10:00 &ndash; 10:00</td>
-        <td class="session"><span class="todo">TODO: session title</span></td>
-        <td class="who"><span class="todo">Name</span></td>
-      </tr>
+        <tr>
+          <td class="time">10:30 AM &ndash; 11:00 AM</td>
+          <td class="session"> Lean Proof Demos</td>
+        </tr>
 
-      <tr>
-        <td class="time">10:00 &ndash; 10:00</td>
-        <td class="session"><span class="todo">TODO: session title</span>
-          <span class="note">Optional one-line note &mdash; delete this line if you don't want notes.</span>
-        </td>
-        <td class="who"><span class="todo">Name</span></td>
-      </tr>
+        <tr>
+          <td class="time">11:00 AM &ndash; 11:30 AM</td>
+          <td class="session"> Exercises
+          </td>
+        </tr>
 
-      <tr class="break">
-        <td class="time">10:00 &ndash; 10:00</td>
-        <td class="session">Break</td>
-        <td class="who"></td>
-      </tr>
+        <tr>
+          <td class="time">1:00 PM &ndash; 1:30 PM</td>
+          <td class="session"> Quantum primitives in Lean
+          </td>
+        </tr>
 
-      <tr>
-        <td class="time">10:00 &ndash; 10:00</td>
-        <td class="session"><span class="todo">TODO: session title</span></td>
-        <td class="who"><span class="todo">Name</span></td>
-      </tr>
+        <tr>
+          <td class="time">1:30 PM &ndash; 2:00 PM </td>
+          <td class="session"> Exercises </td>
+        </tr>
 
-      <tr>
-        <td class="time">10:00 &ndash; 10:00</td>
-        <td class="session"><span class="todo">TODO: session title</span></td>
-        <td class="who"><span class="todo">Name</span></td>
-      </tr>
-
-      <tr>
-        <td class="time">14:15 &ndash; 14:30</td>
-        <td class="session"><span class="todo">TODO: wrap-up / discussion</span></td>
-        <td class="who"><span class="todo">Name</span></td>
-      </tr>
+        <tr>
+          <td class="time">2:00 PM &ndash; 2:30 PM</td>
+          <td class="session"> Getting started on formalizing your own research </td>
+        </tr>
 
     </tbody>
   </table>
 </section>
+
+<!-- ============================================================
+     OVERVIEW
+     ============================================================ -->
+<section id="overview">
+  <h2>Overview</h2>
+  <p class="lede">Attendees will learn how to apply the Lean&nbsp;4 proof assistant to quantum error correction, gaining practical skills in formal specification and mechanical verification of QEC protocols and fault-tolerant operations.</p>
+
+  <p>The promise of fault-tolerant quantum computing rests on the correctness of Quantum Error Correction (QEC) protocols &mdash; yet the proofs underlying key primitives such as lattice surgery and transversal gates often rely on informal arguments rather than rigorous formal justification. This &ldquo;trust gap&rdquo; means that a subtle error in the theoretical foundations of a QEC framework can propagate silently through an entire software and hardware stack.</p>
+
+  <p>This tutorial demonstrates how the Lean&nbsp;4 proof assistant can contribute to bridging this trust gap by providing a machine-checked foundation for QEC. Using the <a href="https://github.com/Stavan-Jain/QECLean">QECLean</a> library as a concrete case study, we show how to translate informal protocol sketches into formal specifications. The library formalizes the stabilizer formalism and provides machine-checked implementations of several stabilizer codes, including their logical operators &mdash; moving QEC designs from the space of informal argument to mechanically verified proof.</p>
+
+  <p>Participants will gain hands-on experience formalizing QEC protocols in Lean&nbsp;4. The tutorial covers the essentials of Lean&nbsp;4's foundation, walks through verification of key quantum code properties and fault-tolerant reasoning, and closes with a discussion of how formal methods can integrate into the broader quantum computing research and development workflow. Attendees will leave equipped with the foundational skills to apply formal verification using Lean&nbsp;4 to their own QEC research.</p>
+</section>
+
 
 <!-- ============================================================
      TARGET AUDIENCE
@@ -333,7 +386,52 @@
 <section id="audience">
   <h2>Who Should Attend</h2>
   <p>This tutorial is intended for QEC researchers, graduate students, and quantum software developers who are familiar with the stabilizer formalism and basic QEC concepts, and who are comfortable with linear algebra and elementary group theory. <strong>No prior experience with proof assistants is required.</strong></p>
-  <p>Attendees will learn to encode QEC concepts as formal Lean&nbsp;4 definitions, construct proofs of protocol correctness, and use the QuantumErrorCorrectionLean library for their own formalization work.</p>
+  <p>Attendees will learn to encode QEC concepts as formal Lean&nbsp;4 definitions, construct proofs of protocol correctness, and familiarize themselves with resources to get started on formalizing their own work. </p>
+</section>
+
+<!-- ============================================================
+     SETUP
+     ------------------------------------------------------------
+     Two paths, both landing on the same environment. The times are
+     measured, not guessed: `lake build QECLight` took 7m40s with a
+     warm mathlib cache on a 4-core machine, peaking at ~5.7 GB.
+     ============================================================ -->
+<section id="setup">
+  <h2>Setup</h2>
+  <p class="lede">We strongly encourage arriving with a working environment to avoid spending time during the session.</p>
+
+  <div class="setup">
+
+    <div class="opt">
+      <h3>In the browser</h3>
+      <p class="eta">About a minute</p>
+      <p class="req">Needs a free GitHub account. Nothing to install.</p>
+      <ol>
+        <li>Open <a href="https://codespaces.new/Stavan-Jain/QECLean">QECLean in Codespaces</a>.</li>
+        <li>Wait for it to open on <code>Playground.lean</code>.</li>
+        <li>Put your cursor at the end of a line &mdash; the goal state appears on the right.</li>
+      </ol>
+    </div>
+
+    <div class="opt">
+      <h3>On your own machine</h3>
+      <p class="eta">30&ndash;45 minutes</p>
+      <p class="req">Needs ~30&nbsp;GB free disk and 8&nbsp;GB&nbsp;RAM. Works offline afterwards.</p>
+      <ol>
+        <li>Install Lean&nbsp;4 and the VS&nbsp;Code extension using the <a href="https://leanprover-community.github.io/get_started.html">official instructions</a> (~10&nbsp;min).</li>
+        <li>Clone the repo and fetch the prebuilt mathlib libraries (~15&nbsp;min, mostly download):
+<pre><code>git clone https://github.com/Stavan-Jain/QECLean.git
+cd QECLean
+lake exe cache get</code></pre></li>
+        <li>Build the tutorial target (~8&nbsp;min):
+<pre><code>lake build QECLight</code></pre></li>
+        <li>Open <code>Playground.lean</code> in VS&nbsp;Code.</li>
+      </ol>
+    </div>
+
+  </div>
+
+  <p class="note-inline">Both paths give you <code>QECLight</code>, which is QECLean without the bivariate-bicycle code family &mdash; those proofs need far more memory than a laptop or a container has. Use <code>import QECLight</code> rather than <code>import QEC</code>; a plain <code>lake build</code> will run for hours and likely run out of memory. If you use Codespaces, delete it afterwards so it doesn't sit against your GitHub storage quota.</p>
 </section>
 
 <!-- ============================================================
@@ -349,18 +447,6 @@
       <a href="https://github.com/Stavan-Jain/QECLean">QECLean</a>
     </li>
     <li>
-      <a href="#">Slides</a>
-      <span class="desc"><span class="todo">TODO: link after the session (or &ldquo;posted here after the tutorial&rdquo;)</span></span>
-    </li>
-    <li>
-      <a href="#">Hands-on exercises</a>
-      <span class="desc"><span class="todo">TODO: link to the exercise repo / starter project</span></span>
-    </li>
-    <li>
-      <a href="#">Setup instructions</a>
-      <span class="desc"><span class="todo">TODO: Lean 4 + VS Code install steps, if you want attendees set up in advance</span></span>
-    </li>
-    <li>
       <a href="https://qce.quantum.ieee.org/2026/qce26-schedule/tutorial-schedule/">QCE26 tutorial schedule</a>
     </li>
   </ul>
@@ -373,7 +459,7 @@
   <h2>Presenters</h2>
   <ul class="people">
     <li>
-      <span class="name"><a href="https://www.linkedin.com/in/stavan-jain-558605217/">Stavan Sunil Jain</a></span>
+      <span class="name"><a href="https://stavan-jain.github.io/">Stavan Sunil Jain</a></span>
       <span class="affil">University of Wisconsin&ndash;Madison</span>
     </li>
     <li>
