@@ -158,40 +158,6 @@
   .links li:first-child { padding-top: 0; }
   .links .desc { display: block; color: var(--ink-soft); font-size: .93rem; margin-top: .15rem; }
 
-  /* ---------- Setup options ---------- */
-
-  .setup { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; margin: 0 0 1.25rem; }
-
-  .opt {
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    padding: 1.1rem 1.2rem 1.25rem;
-    background: var(--bg-soft);
-    display: flex;
-    flex-direction: column;
-    /* Grid and flex items default to min-width:auto, so they refuse to shrink
-       below their content — the long `git clone` URL in the <pre> below would
-       widen this card past the viewport and scroll the whole page sideways.
-       These let the card shrink so the <pre> scrolls on its own instead. */
-    min-width: 0;
-  }
-  .opt ol { min-width: 0; }
-  .opt h3 { margin: 0 0 .15rem; font-size: 1rem; }
-
-  /* The headline number: how long until you're actually running Lean. */
-  .opt .eta {
-    font-size: .74rem;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: var(--accent);
-    margin: 0 0 .7rem;
-  }
-  .opt .req { font-size: .88rem; color: var(--ink-soft); margin: 0 0 .7rem; }
-  .opt ol { margin: 0; padding-left: 1.1rem; font-size: .93rem; }
-  .opt ol li { margin-bottom: .4rem; }
-  .opt ol li:last-child { margin-bottom: 0; }
-
   code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: .88em;
@@ -212,8 +178,6 @@
     line-height: 1.5;
   }
   pre code { background: none; border: 0; padding: 0; font-size: inherit; }
-
-  .note-inline { font-size: .9rem; color: var(--ink-soft); margin: 0; }
 
   /* ---------- Placeholder helper (delete .todo styling when done) ---------- */
 
@@ -239,8 +203,6 @@
   @media (max-width: 34rem) {
     .facts { grid-template-columns: 1fr; gap: .15rem; }
     .facts dt { padding-top: .7rem; }
-
-    .setup { grid-template-columns: 1fr; }
 
     .agenda thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .agenda, .agenda tbody, .agenda tr, .agenda td { display: block; width: 100%; }
@@ -289,7 +251,7 @@
     </dd>
 
     <dt>Room</dt>
-    <dd>TBD</dd>
+    <dd>716A</dd>
 
     <dt>Venue</dt>
     <dd>Metro Toronto Convention Centre, Toronto</dd>
@@ -391,47 +353,11 @@
 
 <!-- ============================================================
      SETUP
-     ------------------------------------------------------------
-     Two paths, both landing on the same environment. The times are
-     measured, not guessed: `lake build QECLight` took 7m40s with a
-     warm mathlib cache on a 4-core machine, peaking at ~5.7 GB.
      ============================================================ -->
 <section id="setup">
   <h2>Setup</h2>
   <p class="lede">We strongly encourage arriving with a working environment to avoid spending time during the session.</p>
-
-  <div class="setup">
-
-    <div class="opt">
-      <h3>In the browser</h3>
-      <p class="eta">5&ndash;10 minutes</p>
-      <p class="req">Needs a free GitHub account. Nothing to install.</p>
-      <ol>
-        <li>Open <a href="https://codespaces.new/Stavan-Jain/QECLean">QECLean in Codespaces</a>.</li>
-        <li>Wait for it to open on <code>Playground.lean</code>.</li>
-        <li>Put your cursor at the end of a line &mdash; the goal state appears on the right.</li>
-      </ol>
-    </div>
-
-    <div class="opt">
-      <h3>On your own machine</h3>
-      <p class="eta">30&ndash;45 minutes</p>
-      <p class="req">Needs ~15&nbsp;GB free disk and 8&nbsp;GB&nbsp;RAM. Works offline afterwards.</p>
-      <ol>
-        <li>Install Lean&nbsp;4 and the VS&nbsp;Code extension using the <a href="https://leanprover-community.github.io/get_started.html">official instructions</a> (~10&nbsp;min).</li>
-        <li>Clone the repo and fetch the prebuilt mathlib libraries (~15&nbsp;min, mostly download):
-<pre><code>git clone https://github.com/Stavan-Jain/QECLean.git
-cd QECLean
-lake exe cache get</code></pre></li>
-        <li>Build the tutorial target (~8&nbsp;min):
-<pre><code>lake build QECLight</code></pre></li>
-        <li>Open <code>Playground.lean</code> in VS&nbsp;Code.</li>
-      </ol>
-    </div>
-
-  </div>
-
-  <p class="note-inline">Both paths give you <code>QECLight</code>, which is QECLean without the bivariate-bicycle code family &mdash; those proofs need a lot of memory currently. Use <code>import QECLight</code> rather than <code>import QEC</code>; a plain <code>lake build</code> will run for hours and likely run out of memory. If you use Codespaces, delete it afterwards so it doesn't sit against your GitHub storage quota.</p>
+  <p>The exercises and demo are in the <a href="https://github.com/Stavan-Jain/lean-exercises">lean-exercises</a> repository. Installation instructions are in its README.</p>
 </section>
 
 <!-- ============================================================
@@ -444,7 +370,7 @@ lake exe cache get</code></pre></li>
   <h2>Materials &amp; Links</h2>
   <ul class="links">
     <li>
-      <a href="https://github.com/Stavan-Jain/QECLean">QECLean</a>
+      <a href="https://github.com/Stavan-Jain/lean-exercises">lean-exercises</a>
     </li>
     <li>
       <a href="https://qce.quantum.ieee.org/2026/qce26-schedule/tutorial-schedule/">QCE26 tutorial schedule</a>
