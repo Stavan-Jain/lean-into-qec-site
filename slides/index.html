@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lean into QEC — slides</title>
+<!--
+  ============================================================================
+  Lean into QEC — QCE26 tutorial deck
+  ============================================================================
+  Present:  open this file in a browser (serve.py -d . 8000), F for fullscreen.
+  Keys:     ← → (or clicker PgUp/PgDn) step builds & slides · N notes · ? help
+  Builds:   staggered reveals are the DEFAULT presenting style — designed
+            slides carry data-frag="n" steps; entering a slide forward starts
+            with builds hidden, each → reveals one. data-frag-until="m" makes
+            an element leave again after step m (spotlight pattern: one card
+            on stage at a time). PDF prints fully built; spotlight cards print
+            as a stacked list.
+  PDF:      Cmd+P from Chrome → each slide is one 1280×720 page.
+  Handout:  open with ?handout → every slide fully built with its speaker
+            notes beneath; Cmd+P gives a slide+notes PDF (1280×1120 pages).
+  Edit:     each slide is a <section class="slide"> below; search "SLIDE 4".
+            The full design plan lives in SLIDE-MAP.md.
+
+  SLIDE MAP                                             status
+    0   (title slide)                                   DESIGNED
+    1   What You'll Leave With                          DESIGNED · 2 builds (takeaway lines)
+    2   The Plan                                        DESIGNED · 6 builds (day strip → divider motif)
+    3   Lean in the News                                DESIGNED · 4 builds (3 clippings + stamp reveal)
+    4   Definitions and Theorems                        DESIGNED · 7 builds (spotlight, bare cards)
+    5   Proofs are Checked                              DESIGNED · 4 builds (kernel + FLT by trivial)
+    6   Proofs are Interactive                          DESIGNED · 6 builds (caret + goal split + focus)
+    7   A Brief History of Lean                         DESIGNED · 5 builds (accumulating timeline)
+    8   Setup                                           DESIGNED · repo link, no builds (uw.html idiom, 2026-09-11)
+    9   divider · session 2: quantum in Lean            DESIGNED · strip reprise, segment lit
+    10  Collaboration at Scale                          DESIGNED · 3 builds (PFR blueprint fills in) · moved up from the closer 2026-09-11
+    11  Metaprogramming and Widgets                     DESIGNED · 2 builds (set widget · toric widget) · restored after PFR 2026-09-11
+    12  Why Formalize QEC                               DESIGNED · 2 builds (AI writes · trust across the stack) · new 2026-09-11
+    13  QECLean                                         DESIGNED · 4 builds (formalism · [[n,k,d]] · codes · widgets) · new 2026-09-11
+    14  The Vocabulary Ladder                           DESIGNED · 55 builds (spotlight, 8 rungs, every component staggered; code rung before logicals, its 7 fields one per click; HasCodeDistance unrolled; [[n,k,d]] package, no math column)
+    15  The Steane Code                                 DESIGNED · 4 builds (Hamming H · Z rows · X rows · [[7,1,3]])
+    16  Does It Scale                                   DESIGNED · 4 builds (Steane · rotated surface · toric · gross) · was "What QECLean Covers"
+    17  Exercises                                       DESIGNED · repo link, no builds
+    18  The Certificate                                 DESIGNED · 2 builds (the [[7,1,3]] type · ⊢ IN LEAN stamp) · new 2026-09-11
+    19  Resources                                       DESIGNED · 2 builds (lanes · email) · LAST SLIDE
+    (the session-1 stubs and the SPEC specimen were deleted 2026-09-07, as in
+    uw.html; 9–19 are session 2. "What a stabilizer code is" and "Reading a
+    Specification" were cut 2026-09-07 once the ladder unrolled the structures and
+    HasCodeDistance itself. 2026-09-11: the "AI + your research" closer (divider ·
+    Reviewing Papers · Implications of AI) folded into the new session-2 opener
+    10–13 (Metaprogramming and Widgets restored as 11); the day strip lost its last segment; Anatomy of
+    a Theorem, the pre-talk holding slide and the QR + lanes setup reprise were cut.)
+
+  DESIGN TOKENS (validated with the dataviz palette checker on --paper):
+    accent indigo #4B38B2 · X-type red #B23B33 · Z-type blue #2380C8
+    status green #2F7D44
+    (green is status-only, always with a ✓ glyph; X-red marks always carry
+    an X/✗ glyph — green/red is never a color-alone distinction. Z-blue is
+    lightened from the doubling deck's so it never collides with the indigo.)
+
+  DEV NOTES:
+    - No compile gate: Lean snippets are hand-checked. Spot-check the final
+      snippets against the QECLean toolchain once before the talk, and capture
+      the genuine error output of `theorem fermat : FermatLastTheorem := by
+      trivial` then (slide 5 shows a plausible rendering of it). Session-2
+      signatures (13, 14) were read off QECLean's `Steane7Cleanup`
+      checkout 2026-09-07 — re-check against the pinned commit.
+    - Slide numbers are injected by the harness into every slide but the
+      title (ported from uw.html 2026-09-07), so reordering never leaves a
+      stale one behind.
+    - Front section shares uw.html's order since 2026-09-07 (objectives ·
+      plan · news · definitions · checked · interactive · history · setup);
+      port harness fixes to both files.
+    - [verify] items per slide are tracked in SLIDE-MAP.md.
+  ============================================================================
+-->
+<style>
+  :root{
+    /* surfaces + ink */
+    --paper:#F9F9F6; --letterbox:#EBEBE4;
+    --ink:#20222E; --ink-2:#545360; --muted:#8B8894;
+    --hair:#E2E1DA; --base-line:#C9C7BD;
+    /* semantic colors (see header note) */
+    --indigo:#4B38B2; --x-red:#B23B33; --z-blue:#2380C8; --ok:#2F7D44;
+    --indigo-wash:rgba(75,56,178,.07); --x-wash:rgba(178,59,51,.08);
+    --z-wash:rgba(35,128,200,.09); --ok-wash:rgba(47,125,68,.09);
+    /* type */
+    --serif:"Charter","Iowan Old Style","Palatino Nova",Palatino,Georgia,serif;
+    --sans:system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,Menlo,"STIX Two Math","Apple Symbols",Consolas,monospace;
+    --s:1;
+  }
+  html,body{height:100%;margin:0}
+  body{background:var(--letterbox);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+  /* ---- stage: fixed 1280×720 design space, scaled to the viewport ---- */
+  .stage{
+    position:fixed;left:50%;top:50%;width:1280px;height:720px;
+    transform:translate(-50%,-50%) scale(var(--s));
+  }
+  .slide{
+    position:absolute;inset:0;background:var(--paper);
+    opacity:0;visibility:hidden;transition:opacity .16s ease;
+    overflow:hidden;
+  }
+  .slide.current{opacity:1;visibility:visible}
+  .notes{display:none}
+
+  /* ---- shared slide chrome ---- */
+  .sl-head{position:absolute;left:84px;top:56px;right:84px}
+  .tick{width:34px;height:5px;border-radius:3px;background:var(--indigo);margin-bottom:18px}
+  .sl-head h2{margin:0;font:600 44px/1.15 var(--serif);letter-spacing:-.01em;color:var(--ink)}
+  .sl-num{position:absolute;right:44px;bottom:32px;font:13px var(--sans);letter-spacing:.06em;color:var(--muted)}
+
+  /* ---- code cards + goal panels (the deck's first-class elements) ---- */
+  .code-card{
+    background:#fff;border:1.5px solid var(--hair);border-radius:14px;
+    padding:22px 28px;font:21px/1.6 var(--mono);color:var(--ink);
+    white-space:pre;
+  }
+  .code-card .kw{color:var(--indigo);font-weight:600}
+  .code-card .cm{color:var(--muted);font-style:italic}
+  .code-card .pn{color:var(--ink-2)}
+  .goal-panel{
+    background:var(--indigo-wash);border-left:3px solid var(--indigo);
+    border-radius:10px;padding:16px 22px;font:19px/1.65 var(--mono);color:var(--ink);
+    white-space:pre;
+  }
+  .goal-panel .gp-label{
+    display:block;font:600 11px var(--sans);letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:8px;white-space:normal;
+  }
+  .goal-panel .hyp{color:var(--ink-2)}
+  .goal-panel .ts{color:var(--indigo);font-weight:700}
+  .err-card{
+    background:#fff;border:1.5px solid var(--hair);border-left:3px solid var(--x-red);
+    border-radius:10px;padding:14px 20px;font:16px/1.55 var(--mono);color:#8A2F28;
+  }
+
+  /* ---- spotlight pattern: one bare card on stage at a time ---- */
+  .spot-stack{position:absolute;left:84px;right:84px;top:184px;bottom:70px}
+  .spot{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:26px;
+  }
+  .spot .code-card{font-size:25px;padding:26px 40px}
+  .spot .code-card.cc-sm{font-size:23px}
+  .mx-row{display:flex;align-items:center;gap:16px;margin-top:-4px}
+  .mx-eq{font:italic 400 26px var(--serif);color:var(--ink-2)}
+  .mx-comma{font:400 30px var(--serif);color:var(--ink);margin:0 2px}
+  .mx-norm{font:400 27px var(--serif);color:var(--ink);margin-left:8px}
+
+  /* ---- slide 3 · interactive proof: inline caret + tactic-state panel ---- */
+  .iv-wrap{
+    position:absolute;left:84px;right:84px;top:200px;bottom:70px;
+    display:flex;align-items:center;justify-content:center;gap:28px;
+  }
+  .iv-code{font-size:21px;position:relative}
+  .iv-caret{
+    display:inline-block;width:2.5px;height:1.25em;margin-left:2px;
+    background:var(--indigo);border-radius:1px;vertical-align:text-bottom;
+  }
+  .iv-caret.on{animation:caretPulse 1.15s ease-in-out infinite}
+  @keyframes caretPulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .iv-panels{position:relative;flex:0 0 380px;height:320px}
+  .iv-state{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center}
+  .iv-state .goal-panel{font-size:19px}
+  .gp-case{color:var(--muted);font-style:italic}
+  .gp-new{background:rgba(75,56,178,.13);border-radius:5px;padding:0 7px;margin:0 -7px}
+  .gp-ok{color:var(--ok);font-weight:600}
+
+  /* ---- slide 6 · lean in the news: three clippings + stamp reveal ---- */
+  .nw-wrap{
+    position:absolute;left:84px;right:84px;top:236px;
+    display:flex;justify-content:center;gap:24px;
+  }
+  .nw-card{
+    position:relative;flex:0 0 344px;min-height:206px;
+    background:#fff;border:1.5px solid var(--hair);border-radius:14px;
+    padding:24px 26px;
+  }
+  .nw-outlet{font:600 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .nw-head{margin-top:14px;font:italic 500 17.5px/1.5 var(--serif);color:var(--ink)}
+  .nw-stamp{position:absolute;right:16px;bottom:-15px}
+  .nw-stamp-in{
+    display:inline-block;transform:rotate(-4deg);
+    background:#FBFAFE;border:2px solid var(--indigo);border-radius:9px;
+    padding:6px 13px;font:600 13.5px var(--sans);letter-spacing:.12em;
+    color:var(--indigo);white-space:nowrap;
+  }
+  .nw-stamp-in .ts-g{font:600 15px var(--serif);margin-right:6px}
+
+  /* ---- slide 7 · two objectives: two oversized lines, nothing else ---- */
+  .obj-wrap{
+    position:absolute;left:84px;right:84px;top:184px;bottom:90px;
+    display:flex;flex-direction:column;justify-content:center;
+    align-items:flex-start;gap:54px;padding-left:118px;
+  }
+  .obj-item{display:flex;align-items:baseline;gap:28px}
+  .obj-n{font:600 50px var(--serif);color:var(--indigo)}
+  .obj-t{font:600 48px/1.15 var(--serif);letter-spacing:-.01em;color:var(--ink)}
+
+  /* ---- slide 8 · the plan for today: day strip (also the divider motif) ---- */
+  .plan-wrap{position:absolute;left:84px;right:84px;top:330px}
+  .plan-sess{
+    position:absolute;top:-38px;font:600 12px var(--sans);
+    letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  }
+  .plan-row{display:flex;gap:3px;height:88px}
+  .plan-seg{
+    box-sizing:border-box;
+    background:#fff;border:1.5px solid var(--hair);border-radius:10px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 8px;
+  }
+  .plan-seg .seg-t{font:600 15px/1.25 var(--sans);color:var(--ink)}
+  .plan-now{background:var(--indigo-wash);border-color:rgba(75,56,178,.45)}
+  .plan-lunch{
+    background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(32,34,46,.05) 6px 12px);
+    border-style:dashed;
+  }
+  .plan-lunch .seg-t{font-weight:400;color:var(--muted)}
+  .plan-marker{
+    position:absolute;top:106px;display:flex;align-items:center;gap:7px;
+    font:600 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--indigo);
+  }
+  .plan-marker .pm-dot{
+    width:9px;height:9px;border-radius:50%;background:var(--indigo);
+    animation:caretPulse 1.4s ease-in-out infinite;
+  }
+
+  /* ---- slide 8 · setup: the repo link alone (uw.html idiom) ---- */
+  .su-wrap{
+    position:absolute;left:84px;right:84px;top:196px;bottom:64px;
+    display:flex;align-items:center;justify-content:center;gap:46px;
+  }
+
+  /* ---- slide 17 · exercises: the repo link alone (uw.html's setup idiom) ---- */
+  .ex-wrap{
+    position:absolute;left:84px;right:84px;top:196px;bottom:64px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  }
+  .su-link{
+    font:600 40px/1.3 var(--mono);letter-spacing:-.02em;color:var(--ink);
+    text-decoration:none;text-align:center;
+  }
+  .su-link .su-path{color:var(--indigo)}
+  .ex-path{font:600 26px var(--mono);color:var(--ink-2)}
+
+  /* ---- slide 4 · the checker: attempt → kernel → verdict ---- */
+  .fl-wrap{
+    position:absolute;left:84px;right:84px;top:200px;bottom:110px;
+    display:flex;align-items:center;justify-content:center;gap:24px;
+  }
+  .fl-input{position:relative;flex:0 0 560px;height:170px}
+  .fl-in{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end}
+  .cc-mini{font-size:16.5px;padding:16px 24px;line-height:1.55}
+  .fl-arr{flex:0 0 64px}
+  .fl-judge{position:relative}
+  .fl-jrow{display:flex;align-items:center;gap:24px}
+  .fl-jrow-b{position:absolute;inset:0}
+  .fl-v{font:600 54px var(--serif)}
+  .fl-v.ok{color:var(--ok)}
+  .fl-v.bad{color:var(--x-red)}
+  .kernel{
+    background:#fff;border:1.5px solid var(--hair);border-radius:14px;
+    padding:22px 30px;font:600 13px var(--sans);letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ink);
+    box-shadow:0 0 0 5px var(--paper),0 0 0 6.5px var(--hair);
+  }
+  .fl-err{position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center}
+
+  /* ================= session 2 · quantum in Lean (designed 2026-09-07) ================= */
+  /* slide 11 · the vocabulary ladder: spotlight — the noun, then math on the left and Lean on the right */
+  .vl-noun{font:600 40px/1.15 var(--serif);letter-spacing:-.01em;color:var(--ink);text-align:center}
+  .vl-noun i{font-style:italic}
+  .vl-row{display:flex;align-items:center;justify-content:center;gap:36px;width:100%}
+  .vl-math{flex:0 0 30%;text-align:right;font:400 26px/1.5 var(--serif);color:var(--ink)}
+  .vl-math i{font-style:italic}
+  .vl-math sup{font-size:.7em}
+  .vl-math .dim{color:var(--ink-2);font-size:.8em}
+  .spot .code-card.vl-card{padding:18px 28px;line-height:1.5}
+  .vl-card .ln{display:block}
+  .spot .code-card.vl-dense{padding:14px 20px;line-height:1.45}
+
+
+
+  /* slide 13 · the Steane code: the Hamming check matrix, then its rows as Pauli strings */
+  .st-wrap{
+    position:absolute;left:84px;right:84px;top:184px;bottom:64px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+  }
+  .st-row{display:flex;align-items:center;gap:84px}
+  .st-col{display:flex;flex-direction:column;gap:4px}
+  .st-p{font:600 34px/1.35 var(--mono);letter-spacing:.3em;color:var(--ink);white-space:nowrap}
+  .st-p .pz{color:var(--z-blue);font-weight:600}
+  .st-p .px{color:var(--x-red);font-weight:600}
+  .st-p .pi,.st-p .b0{color:var(--muted);font-weight:400}
+  .st-p .b1{color:var(--ink);font-weight:600}
+  .st-mat{position:relative;padding:6px 22px}
+  .st-mat::before,.st-mat::after{
+    content:"";position:absolute;top:0;bottom:0;width:11px;
+    border:2px solid var(--ink-2);
+  }
+  .st-mat::before{left:0;border-right:none;border-radius:2px 0 0 2px}
+  .st-mat::after{right:0;border-left:none;border-radius:0 2px 2px 0}
+  .st-params{font:600 46px var(--serif);letter-spacing:-.01em;color:var(--ink);margin-top:6px}
+  .st-params .st-d{color:var(--indigo)}
+
+  /* slide 16 · does it scale: four parameter chips, one per build, small to large */
+  .cv-wrap{
+    position:absolute;left:84px;right:84px;top:184px;bottom:64px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .cv-row{display:flex;justify-content:center;align-items:flex-start;gap:20px}
+  .cv-chip{
+    background:#fff;border:1.5px solid var(--hair);border-radius:12px;
+    padding:18px 22px 15px;text-align:center;
+  }
+  .cv-p{font:600 24px var(--mono);color:var(--ink);white-space:nowrap}
+  .cv-n{margin-top:7px;font:15px var(--sans);color:var(--ink-2);white-space:nowrap}
+
+  /* ---- slides 11–13 · the session-2 opener (closer folded in 2026-09-11) ---- */
+  /* slide 11 · collaboration at scale: the PFR blueprint graph fills in */
+  .bp-wrap{
+    position:absolute;left:84px;right:84px;top:192px;bottom:56px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  .bp-legend{display:flex;gap:28px;font:13.5px var(--sans);color:var(--ink-2)}
+  .bp-legend .lg{display:flex;align-items:center;gap:8px}
+
+  /* slide 12 · why formalize QEC: the slide-1 objectives idiom (.obj-*), nothing of its own */
+
+  /* slide 13 · QECLean: four cards, one per build */
+  .qi-wrap{
+    position:absolute;left:84px;right:84px;top:184px;bottom:64px;
+    display:flex;align-items:center;justify-content:center;gap:22px;
+  }
+  .qi-card{
+    flex:0 0 240px;min-height:118px;box-sizing:border-box;padding:22px 20px;
+    background:#fff;border:1.5px solid var(--hair);border-radius:14px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font:600 26px/1.25 var(--serif);letter-spacing:-.01em;color:var(--ink);
+  }
+  .qi-card i{font-style:italic}
+
+  /* slide 11 · metaprogramming and widgets: two widget panels */
+  .wg-wrap{
+    position:absolute;left:84px;right:84px;top:196px;bottom:64px;
+    display:flex;align-items:center;justify-content:center;gap:34px;
+  }
+  .wg-panel{
+    background:var(--indigo-wash);border-left:3px solid var(--indigo);border-radius:10px;
+    padding:18px 24px 20px;width:432px;box-sizing:border-box;
+  }
+  .wg-panel .gp-label{
+    display:block;font:600 11px var(--sans);letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+  }
+  .wg-goal{font:17px/1.6 var(--mono);color:var(--ink);white-space:pre;margin-bottom:12px}
+  .wg-goal .ts{color:var(--indigo);font-weight:700}
+  .wg-goal .hyp{color:var(--ink-2)}
+  .wg-fig{background:#fff;border:1px solid var(--hair);border-radius:8px;display:flex;justify-content:center}
+
+  /* slide 18 · the certificate: one type, then the news-slide stamp */
+  .ct-wrap{
+    position:absolute;left:84px;right:84px;top:184px;bottom:90px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ct-card{
+    position:relative;background:#fff;border:1.5px solid var(--hair);border-radius:14px;
+    padding:36px 56px;font:600 40px var(--mono);letter-spacing:-.01em;color:var(--ink);white-space:nowrap;
+  }
+  .ct-card .ct-d{color:var(--indigo)}
+  .ct-card .nw-stamp{right:-22px;bottom:-22px}
+  .ct-card .nw-stamp-in{font-size:16px;padding:8px 16px}
+
+  /* slide 19 · resources: four lanes + the contact line */
+  .kg-wrap{
+    position:absolute;left:84px;right:84px;top:190px;bottom:56px;
+    display:flex;align-items:center;justify-content:center;gap:48px;
+  }
+  .kg-left{display:flex;flex-direction:column;gap:14px;width:474px}
+  .kg-mail{
+    position:absolute;right:84px;bottom:56px;
+    font:600 17px var(--mono);color:var(--ink);letter-spacing:-.01em;
+  }
+
+  /* ---- lane cards (Resources; formerly the pre-talk hold and setup slides) ---- */
+  .lane{
+    position:relative;background:#fff;border:1.5px solid var(--hair);border-radius:14px;
+    padding:18px 22px 16px;
+  }
+  .lane-hi{border-color:rgba(75,56,178,.45)}
+  .lane-badge{
+    position:absolute;right:16px;top:16px;
+    font:600 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--indigo);background:var(--indigo-wash);
+    border-radius:999px;padding:4px 11px;
+  }
+  .lane-t{font:600 19.5px var(--sans);color:var(--ink)}
+  .lane-s{margin-top:5px;font:15px var(--sans);color:var(--ink-2)}
+
+  /* ================= slide 1 · title ================= */
+  .t-wrap{position:absolute;left:110px;top:162px;right:110px}
+  .t-eyebrow{font:600 16px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--ink-2)}
+  .t-title{margin:24px 0 0;font:600 92px/1.05 var(--serif);letter-spacing:-.015em;color:var(--ink)}
+  .t-title .t-lean{color:var(--indigo)}
+  .t-rule{width:64px;height:5px;border-radius:3px;background:var(--indigo);margin:36px 0 28px}
+  .t-sub{font:24px/1.45 var(--sans);color:var(--ink-2);max-width:680px}
+  .t-meta{position:absolute;left:110px;bottom:84px;font:18px var(--sans);color:var(--ink)}
+  .t-meta .sep{color:var(--muted);margin:0 10px}
+  .t-meta .dt{color:var(--ink-2)}
+  .t-motif{position:absolute;right:88px;bottom:66px}
+
+  /* ================= SPEC slide (dev only) ================= */
+  .spec{position:absolute;left:84px;right:84px;top:150px;bottom:40px;font:13px var(--sans);color:var(--ink-2)}
+  .spec-row{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px}
+  .swatch{width:88px}
+  .swatch .sw{height:52px;border-radius:10px;border:1px solid var(--hair)}
+  .swatch .sw-l{margin-top:5px;font:11px var(--mono);color:var(--muted);text-align:center}
+  .spec-type div{margin-bottom:6px}
+
+  /* ---- staggered reveals (data-frag="n" appears on the nth keypress) ---- */
+  [data-frag]{opacity:0;transform:translateY(8px);transition:opacity .28s ease,transform .28s ease}
+  [data-frag].on{opacity:1;transform:none}
+  .instant [data-frag]{transition:none}
+
+  /* ---- overlays (outside the scaled stage) ---- */
+  .overlay{position:fixed;z-index:50}
+  #notesOv{
+    left:0;right:0;bottom:0;max-height:44vh;overflow:auto;
+    background:rgba(249,249,246,.97);border-top:1px solid var(--hair);
+    box-shadow:0 -8px 30px rgba(32,34,46,.10);padding:16px 36px 26px;
+  }
+  #notesOv h3{margin:0 0 10px;font:600 12.5px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  #notesBody{font:15.5px/1.62 var(--sans);color:var(--ink);max-width:1080px}
+  #helpOv{
+    left:50%;top:50%;transform:translate(-50%,-50%);
+    background:var(--paper);border:1px solid var(--hair);border-radius:14px;
+    box-shadow:0 18px 60px rgba(32,34,46,.16);padding:24px 32px 28px;min-width:400px;
+  }
+  #helpOv h3{margin:0 0 14px;font:600 12.5px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  #helpOv table{border-collapse:collapse;font:15px var(--sans);color:var(--ink)}
+  #helpOv td{padding:5px 0}
+  #helpOv td:first-child{padding-right:26px;color:var(--ink-2)}
+  kbd{
+    font:600 12.5px var(--mono);background:#fff;border:1px solid var(--base-line);
+    border-bottom-width:2px;border-radius:5px;padding:2px 7px;color:var(--ink);
+  }
+
+  /* ---- handout mode (?handout): slide + speaker notes per page ---- */
+  body.handout{background:#fff}
+  body.handout .stage{position:static;width:auto;height:auto;transform:none}
+  body.handout .slide{
+    position:relative;inset:auto;width:1280px;height:1120px;
+    opacity:1;visibility:visible;page-break-after:always;break-after:page;
+  }
+  body.handout [data-frag]{opacity:1!important;transform:none!important}
+  body.handout .notes{
+    display:block;position:absolute;left:84px;right:84px;top:744px;
+    font:13.5px/1.5 var(--sans);color:var(--ink-2);
+  }
+  body.handout .notes::before{
+    content:"notes";display:block;margin-bottom:8px;padding-top:14px;
+    border-top:1px solid var(--hair);
+    font:600 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  }
+  body.handout .overlay{display:none!important}
+  body.handout .sl-num{top:676px;bottom:auto}
+
+  /* ---- spotlight cards in print/handout: stacked list instead of overlap ---- */
+  body.handout .spot-stack{position:absolute;top:196px;bottom:auto;display:flex;flex-direction:column;gap:9px;align-items:stretch}
+  body.handout .spot{position:static;flex-direction:row;justify-content:flex-start;gap:16px}
+  body.handout .spot .code-card{font-size:13px;padding:9px 16px;line-height:1.5}
+  body.handout .mx-row{display:none}
+  body.handout .vl-noun{font-size:14px;text-align:left;flex:0 0 150px}
+  body.handout .vl-row{gap:10px;width:auto;align-items:flex-start}
+  body.handout .vl-math{flex:0 0 220px!important;font-size:11px!important;text-align:left}
+  body.handout .spot .code-card.vl-card{font-size:10px!important;padding:8px 12px;line-height:1.4}
+  body.handout .iv-wrap{top:196px;bottom:auto;height:400px}
+  body.handout .iv-code{font-size:13px}
+  body.handout .iv-panels{position:static;height:auto;flex:0 0 300px;display:flex;flex-direction:column;gap:8px}
+  body.handout .iv-state{position:static}
+  body.handout .iv-state .goal-panel{font-size:12px}
+  body.handout .fl-wrap{top:196px;bottom:auto;height:340px}
+  body.handout .fl-input{position:static;height:auto;flex:0 0 330px;display:flex;flex-direction:column;gap:8px}
+  body.handout .fl-in{position:static;justify-content:flex-start}
+  body.handout .fl-judge{display:flex;flex-direction:column;gap:10px}
+  body.handout .fl-jrow{position:static;gap:12px}
+  body.handout .fl-v{font-size:26px}
+  body.handout .fl-err{bottom:auto;top:560px}
+  body.handout .su-wrap{top:196px;bottom:auto;height:430px}
+  body.handout .st-wrap,
+  body.handout .cv-wrap,body.handout .ex-wrap,body.handout .bp-wrap,body.handout .sv-wrap,
+  body.handout .wg-wrap,body.handout .ai-wrap,body.handout .kg-wrap{top:196px;bottom:auto;height:470px}
+
+  /* ---- print → PDF: one page per slide ---- */
+  @page{size:1280px 720px;margin:0}
+  @media print{
+    body{background:#fff}
+    .stage{position:static;width:auto;height:auto;transform:none}
+    .slide{
+      position:relative;inset:auto;width:1280px;height:720px;
+      opacity:1;visibility:visible;page-break-after:always;break-after:page;
+    }
+    [data-frag]{opacity:1!important;transform:none!important}
+    .overlay{display:none!important}
+    .spot-stack{position:absolute;top:196px;bottom:auto;display:flex;flex-direction:column;gap:9px;align-items:stretch}
+    .spot{position:static;flex-direction:row;justify-content:flex-start;gap:16px}
+    .spot .code-card{font-size:13px;padding:9px 16px;line-height:1.5}
+    .mx-row{display:none}
+    .vl-noun{font-size:14px;text-align:left;flex:0 0 150px}
+    .vl-row{gap:10px;width:auto;align-items:flex-start}
+    .vl-math{flex:0 0 220px!important;font-size:11px!important;text-align:left}
+    .spot .code-card.vl-card{font-size:10px!important;padding:8px 12px;line-height:1.4}
+    .iv-wrap{top:196px;bottom:auto;height:400px}
+    .iv-code{font-size:13px}
+    .iv-panels{position:static;height:auto;flex:0 0 300px;display:flex;flex-direction:column;gap:8px}
+    .iv-state{position:static}
+    .iv-state .goal-panel{font-size:12px}
+    .fl-wrap{top:196px;bottom:auto;height:340px}
+    .fl-input{position:static;height:auto;flex:0 0 330px;display:flex;flex-direction:column;gap:8px}
+    .fl-in{position:static;justify-content:flex-start}
+    .fl-judge{display:flex;flex-direction:column;gap:10px}
+    .fl-jrow{position:static;gap:12px}
+    .fl-v{font-size:26px}
+    .fl-err{bottom:auto;top:560px}
+    .su-wrap{top:196px;bottom:auto;height:430px}
+    .st-wrap,.cv-wrap,.ex-wrap,
+    .bp-wrap,.sv-wrap,.wg-wrap,.ai-wrap,.kg-wrap{top:196px;bottom:auto;height:470px}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+
+  <!-- ================= SLIDE 0 · title ================= -->
+  <section class="slide s-title current" data-title="Title">
+    <div class="t-wrap">
+      <div class="t-eyebrow">IEEE Quantum Week 2026 · Tutorial</div>
+      <h1 class="t-title"><span class="t-lean">Lean</span> into QEC</h1>
+      <div class="t-rule"></div>
+      <div class="t-sub">machine verification for quantum error correction</div>
+    </div>
+    <div class="t-meta">Stavan · Aws · Swamit · Nithin <span class="sep">·</span> <span class="dt">Toronto · 13 September 2026</span></div>
+    <!-- decorative motif: a qubit dot-grid met by a verification front -->
+    <svg class="t-motif" width="470" height="240" viewBox="0 0 470 240" aria-hidden="true">
+      <circle cx="24" cy="24" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="24" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="24" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="24" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="24" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="174" cy="24" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="24" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="24" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="264" cy="24" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="24" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="324" cy="24" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="354" cy="24" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="24" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="24" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="24" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="24" cy="54" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="54" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="54" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="54" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="54" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="174" cy="54" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="54" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="54" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="264" cy="54" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="54" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="324" cy="54" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="354" cy="54" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="54" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="54" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="54" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="24" cy="84" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="84" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="84" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="84" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="84" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="174" cy="84" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="84" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="84" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="264" cy="84" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="84" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="324" cy="84" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="354" cy="84" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="84" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="84" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="84" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="24" cy="114" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="114" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="114" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="114" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="114" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="174" cy="114" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="114" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="114" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="264" cy="114" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="114" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="324" cy="114" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="354" cy="114" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="114" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="114" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="114" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="24" cy="144" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="144" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="144" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="144" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="144" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="174" cy="144" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="144" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="144" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="264" cy="144" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="144" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="324" cy="144" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="354" cy="144" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="144" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="144" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="144" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="24" cy="174" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="174" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="174" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="174" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="174" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="174" cy="174" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="174" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="174" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="264" cy="174" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="174" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="324" cy="174" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="354" cy="174" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="174" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="174" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="174" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="24" cy="204" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="54" cy="204" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="84" cy="204" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="114" cy="204" r="5" fill="#4B38B2" opacity=".55"/>
+      <circle cx="144" cy="204" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="174" cy="204" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="204" cy="204" r="5" fill="#4B38B2" opacity=".78"/>
+      <circle cx="234" cy="204" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="264" cy="204" r="5" fill="#4B38B2" opacity="1"/>
+      <circle cx="294" cy="204" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="324" cy="204" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="354" cy="204" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="384" cy="204" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="414" cy="204" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <circle cx="444" cy="204" r="5" fill="none" stroke="#C9C7BD" stroke-width="1.5"/>
+      <line x1="330" y1="6" x2="280" y2="226" stroke="#545360" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <circle cx="309.5" cy="96" r="17.5" fill="#F9F9F6"/>
+      <text x="309.5" y="107" text-anchor="middle" style="font:600 30px var(--serif)" fill="#4B38B2">&#x22A2;</text>
+    </svg>
+    <aside class="notes">Welcome everyone, thanks for joining me! I'm excited to be presenting Lean into QEC,
+      a tutorial on machine verification of quantum error correction. My name is Stavan and I'm a PhD student
+      at the University of Wisconsin–Madison. I currently work on mechanizing the theory of quantum error
+      correction in Lean. I am advised by Aws Albarghouthi.</aside>
+  </section>
+
+  <!-- ================= SLIDE 1 · what you'll leave with ================= -->
+  <!-- deliberately near-bare (2026-08-22), reframed audience-side (2026-08-24): two
+       oversized takeaway lines, one click each — the visual's only job is place-keeping
+       while the pitch is spoken. Details live in the script. -->
+  <section class="slide" data-title="What you'll leave with">
+    <header class="sl-head"><div class="tick"></div><h2>What You’ll Leave With</h2></header>
+
+    <div class="obj-wrap">
+      <div class="obj-item" data-frag="1"><span class="obj-n">1</span><span class="obj-t">A reason to use Lean</span></div>
+      <div class="obj-item" data-frag="2"><span class="obj-n">2</span><span class="obj-t">Your first formalized quantum proofs</span></div>
+    </div>
+
+    <aside class="notes">By the end of today, I hope you leave with two things. [1] First, a reason to use
+      Lean — I want to convince you it's a powerful tool the quantum computing community will benefit from,
+      and that's a pitch to both the theoreticians and the engineers in the room: proofs you can trust, and
+      designs you can check. [2] And second, your first formalized quantum proofs — enough Lean to understand how the
+      tool works: how the compiler checks proofs, how to prove basic things about qubits and unitaries, and
+      a sense of where it fits in your own research. You won't leave an expert; you will leave having proved
+      something real.</aside>
+  </section>
+
+  <!-- ================= SLIDE 2 · the plan for today ================= -->
+  <!-- the day strip — segments appear in speaking order; the lit "this talk" segment
+       says where we are. This strip (current segment lit) is the motif for every section
+       divider (slide 9). No times shown (decided 2026-08-29). The closing segment
+       ("AI + your research") left the strip 2026-09-11 when the closer folded into the
+       session-2 opener; quantum and exercises widened to fill it.
+       1: session-1 label + this talk · 2: demo · 3: setup + exercises ·
+       4: lunch + session-2 label + quantum · 5: demo 2 (added 2026-09-11) · 6: exercises -->
+  <section class="slide" data-title="The plan">
+    <header class="sl-head"><div class="tick"></div><h2>The Plan</h2></header>
+
+    <div class="plan-wrap">
+      <div class="plan-sess" style="left:0" data-frag="1">Session 1</div>
+      <div class="plan-sess" style="left:601px" data-frag="4">Session 2</div>
+      <div class="plan-row">
+        <div class="plan-seg plan-now" style="flex:0 0 150px" data-frag="1"><div class="seg-t">this talk</div></div>
+        <div class="plan-seg" style="flex:0 0 150px" data-frag="2"><div class="seg-t">demo 1</div></div>
+        <div class="plan-seg" style="flex:0 0 205px" data-frag="3"><div class="seg-t">setup + exercises</div></div>
+        <div class="plan-seg plan-lunch" style="flex:0 0 84px" data-frag="4"><div class="seg-t">lunch</div></div>
+        <div class="plan-seg" style="flex:0 0 168px" data-frag="4"><div class="seg-t">quantum in Lean</div></div>
+        <div class="plan-seg" style="flex:0 0 150px" data-frag="5"><div class="seg-t">demo 2</div></div>
+        <div class="plan-seg" style="flex:0 0 187px" data-frag="6"><div class="seg-t">exercises</div></div>
+      </div>
+    </div>
+
+    <aside class="notes">Here's how the tutorial is structured. Right now: this talk. [demo 1]
+      Next, I'll do a live demo of some Lean proofs about propositional logic. [setup + exercises] The rest
+      of the session is yours — time to get set up, play around with Lean, and work through the first
+      exercises. [after lunch] After lunch we start talking about quantum computing concepts in Lean. [demo 2] Then a second live demo: building the Steane code in Lean, field by
+      field. [exercises] We'll have another exercise session, and we'll close with where Lean fits in your own research.</aside>
+  </section>
+
+  <!-- ================= SLIDE 3 · lean in the news ================= -->
+  <!-- three verified 2026 clippings accumulate (1–3), then the reveal: all three get the
+       "⊢ IN LEAN" stamp at once (4). Headlines verbatim, verified 2026-08-22 (Decoder, Forbes)
+       and 2026-09-11 (Quanta) — see SLIDE-MAP. Order May → Aug → Sep: Erdős · Riemann ·
+       Navier–Stokes. The Quartz/Astra card was replaced by the Navier–Stokes clipping
+       2026-09-11 (by request); the claim is contested — the notes carry the caveats. -->
+  <section class="slide" data-title="Lean in the news">
+    <header class="sl-head"><div class="tick"></div><h2>Lean in the News</h2></header>
+
+    <div class="nw-wrap">
+      <div class="nw-card" data-frag="1">
+        <div class="nw-outlet">The Decoder · May 2026</div>
+        <div class="nw-head">“Google Deepmind’s AlphaProof Nexus solves decades-old math problems for a few hundred dollars”</div>
+        <span class="nw-stamp" data-frag="4"><span class="nw-stamp-in"><span class="ts-g">⊢</span>IN LEAN</span></span>
+      </div>
+      <div class="nw-card" data-frag="2">
+        <div class="nw-outlet">Forbes · August 2026</div>
+        <div class="nw-head">“Claude Just Broke A Math Record That Stood For 37 Years”</div>
+        <span class="nw-stamp" data-frag="4"><span class="nw-stamp-in"><span class="ts-g">⊢</span>IN LEAN</span></span>
+      </div>
+      <div class="nw-card" data-frag="3">
+        <div class="nw-outlet">Quanta Magazine · September 2026</div>
+        <div class="nw-head">“AI Has Solved One of Math’s $1 Million Millennium Prize Problems”</div>
+        <span class="nw-stamp" data-frag="4"><span class="nw-stamp-in"><span class="ts-g">⊢</span>IN LEAN</span></span>
+      </div>
+    </div>
+
+    <aside class="notes">Why Lean, and why now? Here is just this summer. May: DeepMind's AlphaProof
+      Nexus solves nine Erdős problems — two of them open for 56 years — for a few hundred dollars each.
+      August 10th: Anthropic points an unreleased Claude at the Riemann zeta function and breaks a
+      37-year-old record — the fraction of zeros proven to lie on the critical line jumps from 41.6 to 67.2
+      percent. The Riemann Hypothesis is not proved. And five days ago, September 8th: OpenAI announces
+      that ten thousand agents on an unreleased model found a finite-time singularity in the
+      three-dimensional Navier–Stokes equations — a Millennium Prize problem — and shipped a Lean proof
+      alongside the paper. Say the caveats out loud. OpenAI is not claiming the prize. A human team
+      announced closely related results twelve hours earlier, and both built on Córdoba and
+      Martínez-Zoroa. The community has not finished reading. What nobody disputes is the Lean check. The
+      open question is whether the theorem Lean checked is the Clay problem — a question about fluids,
+      not about Lean, and the same question you will ask of a distance definition later today. Now notice
+      what all three have in common — [stamp reveal] — Google, Anthropic, and OpenAI are competitors; the
+      one scoreboard they all trust is the proof checker. Every one of these results shipped in Lean. So
+      what is this thing they are all shipping their proofs in?</aside>
+  </section>
+
+  <!-- ================= SLIDE 4 · definitions and theorems ================= -->
+  <!-- spotlight build — exactly one card on stage per step (data-frag + data-frag-until),
+       bare cards, no labels (the script carries the framing). Realigned to uw.html's slide
+       2026-09-12 (by request): 1: IsEven · 2: fib + rendered sequence · 3: IsEven (fib 6),
+       statement only — the bridge from defs to theorems · 4: and_swap with its proof ·
+       5: √2 irrational (mathlib) · 6: X_on_ket0 (QECLean, Gates.lean) in place of uw's
+       reverse_reverse — the one difference · 7: FLT closer (the ∀-form, defeq to mathlib's
+       FermatLastTheorem def, shown as a bare `theorem` signature; mathlib declares it as a
+       `def : Prop` because nobody has proved it — the notes carry that). The Xmat / ket0 /
+       toric cards left this slide; the toric statement now first appears on Does It Scale.
+       Snippets verified against the tutorial repo's mathlib pin 2026-08-31 (uw). -->
+  <section class="slide" data-title="Definitions and Theorems">
+    <header class="sl-head"><div class="tick"></div><h2>Definitions and Theorems</h2></header>
+
+    <div class="spot-stack">
+      <div class="spot" data-frag="1" data-frag-until="1">
+        <div class="code-card"><span class="kw">def</span> IsEven (n : ℕ) : Prop := ∃ k : ℕ, n = k + k</div>
+      </div>
+
+      <div class="spot" data-frag="2" data-frag-until="2">
+        <div class="code-card"><span class="kw">def</span> fib : ℕ → ℕ
+  | 0 => 0
+  | 1 => 1
+  | n + 2 => fib n + fib (n + 1)</div>
+        <div class="mx-row">
+          <span class="mx-eq">=</span>
+          <span class="mx-norm">0, 1, 1, 2, 3, 5, 8, 13, …</span>
+        </div>
+      </div>
+
+      <div class="spot" data-frag="3" data-frag-until="3">
+        <div class="code-card"><span class="kw">theorem</span> fib_six_even : IsEven (fib 6)</div>
+      </div>
+
+      <div class="spot" data-frag="4" data-frag-until="4">
+        <div class="code-card"><span class="kw">theorem</span> and_swap (P Q : Prop) : P ∧ Q → Q ∧ P := <span class="kw">by</span>
+  intro h
+  constructor
+  · exact h.right
+  · exact h.left</div>
+      </div>
+
+      <div class="spot" data-frag="5" data-frag-until="5">
+        <div class="code-card"><span class="kw">theorem</span> irrational_sqrt_two : Irrational (√2)</div>
+      </div>
+
+      <div class="spot" data-frag="6" data-frag-until="6">
+        <div class="code-card"><span class="kw">lemma</span> X_on_ket0 : X • |0⟩ = |1⟩</div>
+      </div>
+
+      <div class="spot" data-frag="7">
+        <div class="code-card cc-sm"><span class="kw">theorem</span> fermat_last_theorem :
+    ∀ n ≥ 3, ∀ a b c : ℕ, a ≠ 0 → b ≠ 0 → c ≠ 0 → a ^ n + b ^ n ≠ c ^ n</div>
+      </div>
+    </div>
+
+    <aside class="notes">Right, so this tutorial is really about Lean, a special type of programming language
+      called a proof assistant. Lean lets you write mathematical definitions — [IsEven] read it aloud: n is
+      even when there exists a k with n = k + k. Definitions can be programs — [fib] here's Fibonacci, and
+      Lean runs it like any other code. Then you write theorem statements about your own
+      definitions — [fib_six_even] fib 6 is 8, and 8 is 4 + 4, so it's even. That's a claim, not a
+      computation: it needs a proof. And you write proofs in Lean's syntax — [and_swap] here's a first
+      theorem with its proof; don't worry about the
+      syntax yet, we'll do this live in a few minutes. Statements can be about the library's definitions —
+      [irrational_sqrt_two] mathlib is a community-driven library of formalized mathematics; this is its
+      statement that √2 is irrational. They can be about our own field — [X_on_ket0] the bit flip: X applied to |0⟩
+      gives |1⟩, as QECLean states it — after lunch every symbol in that line will be a definition you have
+      read. And they scale all the way to research — [flt] the statement of Fermat's Last Theorem, word for word as mathlib states it. Nobody
+      has proved it in Lean: the cubes case is done there today, and proving the full statement is an
+      active multi-year formalization project led by Kevin Buzzard. In an hour you'll be proving statements like the ones at the start.</aside>
+  </section>
+
+  <!-- ================= SLIDE 5 · proofs are checked ================= -->
+  <!-- attempt → kernel → verdict, the ritual twice. 1: and_swap alone · 2: kernel +
+       arrows + green ✓ · 3: FLT-by-trivial swaps in alone (kernel leaves) · 4: kernel +
+       arrows return with red ✗ + genuine error text.
+       [verify] capture the real `trivial` failure output before the talk. -->
+  <section class="slide" data-title="Proofs are checked">
+    <header class="sl-head"><div class="tick"></div><h2>Proofs are Checked</h2></header>
+
+    <div class="fl-wrap">
+      <div class="fl-input">
+        <div class="fl-in" data-frag="1" data-frag-until="2">
+          <div class="code-card cc-mini"><span class="kw">theorem</span> and_swap (p q : Prop) : p ∧ q → q ∧ p := <span class="kw">by</span>
+  intro h
+  constructor
+  · exact h.right
+  · exact h.left</div>
+        </div>
+        <div class="fl-in" data-frag="3">
+          <div class="code-card cc-mini"><span class="kw">theorem</span> fermat : ∀ a b c n : ℕ, 3 ≤ n →
+    a ≠ 0 → b ≠ 0 → a^n + b^n ≠ c^n := <span class="kw">by</span>
+  trivial</div>
+        </div>
+      </div>
+      <div class="fl-judge">
+        <div class="fl-jrow" data-frag="2" data-frag-until="2">
+          <svg class="fl-arr" width="64" height="22" viewBox="0 0 64 22" aria-hidden="true"><line x1="0" y1="11" x2="50" y2="11" stroke="#20222E" stroke-width="1.75"/><path d="M50 4.5 L62 11 L50 17.5 Z" fill="#20222E"/></svg>
+          <div class="kernel">kernel</div>
+          <svg class="fl-arr" width="64" height="22" viewBox="0 0 64 22" aria-hidden="true"><line x1="0" y1="11" x2="50" y2="11" stroke="#20222E" stroke-width="1.75"/><path d="M50 4.5 L62 11 L50 17.5 Z" fill="#20222E"/></svg>
+          <span class="fl-v ok">✓</span>
+        </div>
+        <div class="fl-jrow fl-jrow-b" data-frag="4">
+          <svg class="fl-arr" width="64" height="22" viewBox="0 0 64 22" aria-hidden="true"><line x1="0" y1="11" x2="50" y2="11" stroke="#20222E" stroke-width="1.75"/><path d="M50 4.5 L62 11 L50 17.5 Z" fill="#20222E"/></svg>
+          <div class="kernel">kernel</div>
+          <svg class="fl-arr" width="64" height="22" viewBox="0 0 64 22" aria-hidden="true"><line x1="0" y1="11" x2="50" y2="11" stroke="#20222E" stroke-width="1.75"/><path d="M50 4.5 L62 11 L50 17.5 Z" fill="#20222E"/></svg>
+          <span class="fl-v bad">✗</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fl-err" data-frag="4">
+      <div class="err-card">tactic 'trivial' failed<br>⊢ ∀ a b c n : ℕ, 3 ≤ n → …</div>
+    </div>
+
+    <aside class="notes">Importantly, when you write a proof of a theorem in Lean, there's a small part of
+      the Lean compiler — the kernel — whose only job is to check whether the proof truly proves the theorem
+      in question. [and_swap] Take our proof from a minute ago — [kernel + ✓] the kernel checks it:
+      accepted. [fermat] So if I put in my
+      ingenious proof of Fermat's Last Theorem — [kernel + ✗] Lean will complain to me. It doesn't matter who you are
+      or how confident you feel; the kernel is not impressed.</aside>
+  </section>
+
+  <!-- ================= SLIDE 6 · proofs are interactive ================= -->
+  <!-- the and_swap card returns with an editor caret; each build moves the caret one line
+       and swaps the tactic-state panel: 1: at `by` (initial goal) · 2: after intro h
+       (hypothesis enters, highlighted) · 3: after constructor (goal SPLITS into case
+       left / case right, both highlighted) · 4: caret BEFORE exact h.right (the dot has
+       focused case left — only it is shown) · 5: caret before exact h.left (case right
+       focused) · 6: at the end (No goals ✓). Focus semantics per Lean: inside a bullet,
+       only the focused goal is visible. -->
+  <section class="slide" data-title="Proofs are interactive">
+    <header class="sl-head"><div class="tick"></div><h2>Proofs are Interactive</h2></header>
+
+    <div class="iv-wrap">
+      <div class="code-card iv-code"><span class="kw">theorem</span> and_swap (p q : Prop) : p ∧ q → q ∧ p := <span class="kw">by</span><span class="iv-caret" data-frag="1" data-frag-until="1"></span>
+  intro h<span class="iv-caret" data-frag="2" data-frag-until="2"></span>
+  constructor<span class="iv-caret" data-frag="3" data-frag-until="3"></span>
+  · <span class="iv-caret" data-frag="4" data-frag-until="4"></span>exact h.right
+  · <span class="iv-caret" data-frag="5" data-frag-until="5"></span>exact h.left<span class="iv-caret" data-frag="6"></span></div>
+
+      <div class="iv-panels">
+        <div class="iv-state" data-frag="1" data-frag-until="1">
+          <div class="goal-panel"><span class="gp-label">Tactic state</span><span class="hyp">p q : Prop</span>
+<span class="ts">⊢</span> p ∧ q → q ∧ p</div>
+        </div>
+        <div class="iv-state" data-frag="2" data-frag-until="2">
+          <div class="goal-panel"><span class="gp-label">Tactic state</span><span class="hyp">p q : Prop</span>
+<span class="hyp gp-new">h : p ∧ q</span>
+<span class="ts">⊢</span> q ∧ p</div>
+        </div>
+        <div class="iv-state" data-frag="3" data-frag-until="3">
+          <div class="goal-panel"><span class="gp-label">Tactic state</span><span class="gp-case">case left</span>
+<span class="hyp">h : p ∧ q</span>
+<span class="gp-new"><span class="ts">⊢</span> q</span>
+
+<span class="gp-case">case right</span>
+<span class="hyp">h : p ∧ q</span>
+<span class="gp-new"><span class="ts">⊢</span> p</span></div>
+        </div>
+        <div class="iv-state" data-frag="4" data-frag-until="4">
+          <div class="goal-panel"><span class="gp-label">Tactic state</span><span class="gp-case">case left</span>
+<span class="hyp">h : p ∧ q</span>
+<span class="ts">⊢</span> q</div>
+        </div>
+        <div class="iv-state" data-frag="5" data-frag-until="5">
+          <div class="goal-panel"><span class="gp-label">Tactic state</span><span class="gp-case">case right</span>
+<span class="hyp">h : p ∧ q</span>
+<span class="ts">⊢</span> p</div>
+        </div>
+        <div class="iv-state" data-frag="6">
+          <div class="goal-panel"><span class="gp-label">Tactic state</span><span class="gp-ok">No goals ✓</span></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="notes">Another cool feature of Lean is that it is interactive: you can step through the
+      proof and see the remaining proof obligations change. [caret at by] When my cursor is here, Lean shows
+      me what there is to prove: given propositions p and q, that p ∧ q implies q ∧ p. [after intro h] The
+      intro step moves the hypothesis into my context — I now have h, a proof of p ∧ q, and the goal has
+      changed. [after constructor] constructor splits the conjunction — I now owe two things: a proof of q,
+      and a proof of p. [before exact h.right] The little dot focuses the first goal — everything else
+      disappears until it's done — and exact h.right will discharge it. [before exact h.left] The second dot
+      focuses what remains: one obligation, a proof of p. [end] And at the end — no goals. The proof is
+      complete. This panel is the InfoView; you'll be living in it all afternoon.</aside>
+  </section>
+
+  <!-- ================= SLIDE 7 · a brief history of Lean ================= -->
+  <!-- accumulating timeline: bare axis on entry, then per build an era band + node.
+       1: 2013 Lean/MSR · 2: 2017 mathlib · 3: 2019–22 research math · 4: 2024 AlphaProof
+       + SciAm clipping · 5: 2025 Aristotle + clipping.
+       All facts verified 2026-08-22, see SLIDE-MAP. -->
+  <section class="slide" data-title="A brief history of Lean">
+    <header class="sl-head"><div class="tick"></div><h2>A Brief History of Lean</h2></header>
+
+    <div class="diagram" style="position:absolute;left:84px;top:190px">
+      <svg width="1112" height="470" viewBox="0 0 1112 470" aria-label="Timeline of Lean from 2013 to 2026: born at Microsoft Research, mathlib, research-level mathematics, IMO silver and gold">
+        <!-- era bands (arrive with their first node) -->
+        <g data-frag="1">
+          <rect x="60" y="20" width="296" height="430" fill="rgba(32,34,46,.04)"/>
+          <text x="72" y="40" style="font:600 11.5px var(--sans);letter-spacing:.16em" fill="#8B8894">ORIGINS</text>
+        </g>
+        <g data-frag="2">
+          <rect x="356" y="20" width="444" height="430" fill="rgba(75,56,178,.05)"/>
+          <text x="368" y="40" style="font:600 11.5px var(--sans);letter-spacing:.16em" fill="#8B8894">MATHEMATICS</text>
+        </g>
+        <g data-frag="4">
+          <rect x="800" y="20" width="312" height="430" fill="rgba(75,56,178,.10)"/>
+          <text x="812" y="40" style="font:600 11.5px var(--sans);letter-spacing:.16em" fill="#8B8894">AI</text>
+        </g>
+
+        <!-- the bare axis: always on stage -->
+        <line x1="36" y1="250" x2="1076" y2="250" stroke="#C9C7BD" stroke-width="1.5"/>
+        <path d="M1076 244 L1089 250 L1076 256 Z" fill="#C9C7BD"/>
+        <g stroke="#C9C7BD" stroke-width="1.25">
+          <line x1="60" y1="245" x2="60" y2="255"/><line x1="134" y1="245" x2="134" y2="255"/>
+          <line x1="208" y1="245" x2="208" y2="255"/><line x1="282" y1="245" x2="282" y2="255"/>
+          <line x1="356" y1="245" x2="356" y2="255"/><line x1="430" y1="245" x2="430" y2="255"/>
+          <line x1="504" y1="245" x2="504" y2="255"/><line x1="578" y1="245" x2="578" y2="255"/>
+          <line x1="652" y1="245" x2="652" y2="255"/><line x1="726" y1="245" x2="726" y2="255"/>
+          <line x1="800" y1="245" x2="800" y2="255"/><line x1="874" y1="245" x2="874" y2="255"/>
+          <line x1="948" y1="245" x2="948" y2="255"/>
+        </g>
+
+        <!-- 1 · 2013: Lean is born -->
+        <g data-frag="1">
+          <circle cx="60" cy="250" r="6" fill="#20222E"/>
+          <text x="40" y="284" style="font:600 19px var(--serif)" fill="#20222E">2013</text>
+          <text x="40" y="308" style="font:600 15px var(--sans)" fill="#20222E">Lean</text>
+          <text x="40" y="327" style="font:13px var(--sans)" fill="#545360">Leonardo de Moura · Microsoft Research</text>
+        </g>
+
+        <!-- 2 · 2017: mathlib -->
+        <g data-frag="2">
+          <circle cx="356" cy="250" r="6" fill="#20222E"/>
+          <text x="356" y="228" text-anchor="middle" style="font:600 19px var(--serif)" fill="#20222E">2017</text>
+          <text x="356" y="204" text-anchor="middle" style="font:600 15px var(--sans)" fill="#20222E">mathlib</text>
+          <text x="356" y="184" text-anchor="middle" style="font:13px var(--sans)" fill="#545360">the mathematicians arrive</text>
+        </g>
+
+        <!-- 3 · 2019–22: research-level mathematics -->
+        <g data-frag="3">
+          <circle cx="615" cy="250" r="6" fill="#20222E"/>
+          <text x="615" y="284" text-anchor="middle" style="font:600 19px var(--serif)" fill="#20222E">2019 – 2022</text>
+          <text x="615" y="308" text-anchor="middle" style="font:600 15px var(--sans)" fill="#20222E">research-level mathematics</text>
+          <text x="615" y="327" text-anchor="middle" style="font:13px var(--sans)" fill="#545360">perfectoid spaces · the Liquid Tensor Experiment</text>
+        </g>
+
+        <!-- 4 · 2024: AlphaProof, IMO silver + clipping -->
+        <g data-frag="4">
+          <circle cx="874" cy="250" r="6" fill="#20222E"/>
+          <text x="884" y="232" style="font:600 19px var(--serif)" fill="#20222E">2024</text>
+          <line x1="874" y1="244" x2="800" y2="158" stroke="#C9C7BD" stroke-width="1.25"/>
+          <rect x="554" y="66" width="252" height="92" rx="10" fill="#fff" stroke="#E2E1DA" stroke-width="1.5"/>
+          <text x="570" y="90" style="font:600 10.5px var(--sans);letter-spacing:.14em" fill="#8B8894">SCIENTIFIC AMERICAN · JULY 2024</text>
+          <text x="570" y="114" style="font:italic 500 15px var(--serif)" fill="#20222E">“AI Reaches Silver-Medal Level</text>
+          <text x="570" y="134" style="font:italic 500 15px var(--serif)" fill="#20222E">at This Year’s Math Olympiad”</text>
+        </g>
+
+        <!-- 5 · 2025: Aristotle, IMO gold + clipping -->
+        <g data-frag="5">
+          <circle cx="948" cy="250" r="6" fill="#20222E"/>
+          <text x="958" y="284" style="font:600 19px var(--serif)" fill="#20222E">2025</text>
+          <line x1="948" y1="256" x2="872" y2="332" stroke="#C9C7BD" stroke-width="1.25"/>
+          <rect x="640" y="334" width="260" height="110" rx="10" fill="#fff" stroke="#E2E1DA" stroke-width="1.5"/>
+          <text x="656" y="358" style="font:600 10.5px var(--sans);letter-spacing:.14em" fill="#8B8894">BUSINESS WIRE · JULY 2025</text>
+          <text x="656" y="382" style="font:italic 500 15px var(--serif)" fill="#20222E">“Harmonic Announces IMO Gold</text>
+          <text x="656" y="402" style="font:italic 500 15px var(--serif)" fill="#20222E">Medal-Level Performance”</text>
+          <text x="656" y="428" style="font:600 12.5px var(--sans)" fill="#4B38B2">5 / 6 proofs — formally verified in Lean</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <aside class="notes">2013: Lean is born at Microsoft Research — Leonardo de Moura, creator of the Z3 SMT
+      solver, starts it as a research project to bridge the gap between automated and interactive theorem
+      proving. Even its earliest users were formalizing mathematics — homotopy type theory, category theory,
+      abstract algebra — mostly type theorists and logicians. 2017: the working mathematicians arrive in
+      force — Kevin Buzzard and others start using it, and
+      mathlib forms: an open-source, community-driven effort to formalize mathematics. 2019 to 2022: proof
+      that Lean can handle research-level mathematics — perfectoid spaces are formalized in 2019, and Peter
+      Scholze poses the Liquid Tensor Experiment in December 2020; the key theorem is verified within six
+      months and the full challenge completed in July 2022. Up to this point, writing formal proofs was
+      painstaking — roughly ten times the effort of the handwritten proof. Then AI arrived. People started
+      building tools that produce Lean proofs rather than natural-language proofs, precisely so the output
+      can be trusted. 2024: DeepMind's AlphaProof scores 28 out of 42 at the IMO — silver-medal standard,
+      one point below gold, the first AI to reach a medal tier. 2025: Harmonic's Aristotle reaches
+      gold-medal performance — five of six problems, and unlike the natural-language golds that year, every
+      proof formally verified in Lean.</aside>
+  </section>
+
+  <!-- ================= SLIDE 8 · setup ================= -->
+  <!-- uw.html's setup idiom (2026-09-11, by request; the QR + lanes reprise and the pre-talk
+       holding slide were cut the same day): the repo link alone, the handoff into the
+       demo/setup block. The setup steps live in the repo README. No builds. -->
+  <section class="slide" data-title="Setup">
+    <header class="sl-head"><div class="tick"></div><h2>Setup</h2></header>
+
+    <div class="su-wrap">
+      <a class="su-link" href="https://github.com/Stavan-Jain/lean-exercises">github.com<span
+        class="su-path">/Stavan-Jain/lean-exercises</span></a>
+    </div>
+
+    <aside class="notes">Everything for the hands-on part is here — go to this repo and follow the setup
+      in the README. The browser lane, GitHub Codespaces, takes five to ten minutes and can build in the
+      background while we do the demo; if you'd rather install locally, kick it off now and let it finish
+      over lunch. Either way, use the QECLight variant. ([verify] the README carries the setup steps, and
+      whether there are helpers in the room to point at for anyone who gets stuck.)</aside>
+  </section>
+
+  <!-- ================= SLIDE 9 · divider · session 2 ================= -->
+  <!-- day-strip divider: the slide-3 strip returns with "quantum in Lean" lit. No builds. -->
+  <section class="slide" data-title="divider · session 2">
+    <header class="sl-head"><div class="tick"></div><h2>Quantum in Lean</h2></header>
+
+    <div class="plan-wrap">
+      <div class="plan-sess" style="left:0">Session 1</div>
+      <div class="plan-sess" style="left:601px">Session 2</div>
+      <div class="plan-row">
+        <div class="plan-seg" style="flex:0 0 150px"><div class="seg-t">Introduction to Lean</div></div>
+        <div class="plan-seg" style="flex:0 0 150px"><div class="seg-t">Demo 1</div></div>
+        <div class="plan-seg" style="flex:0 0 205px"><div class="seg-t">Setup + Exercises</div></div>
+        <div class="plan-seg plan-lunch" style="flex:0 0 84px"><div class="seg-t">Lunch</div></div>
+        <div class="plan-seg plan-now" style="flex:0 0 168px"><div class="seg-t">Quantum in Lean</div></div>
+        <div class="plan-seg" style="flex:0 0 150px"><div class="seg-t">Demo 2</div></div>
+        <div class="plan-seg" style="flex:0 0 187px"><div class="seg-t">Exercises</div></div>
+      </div>
+    </div>
+
+    <aside class="notes">Welcome back. This morning the objects were propositions, equations and sets.
+      This afternoon they are Paulis, stabilizer groups and codes — and the tool is exactly the same:
+      definitions, statements, and a kernel that checks. Before the vocabulary, ten minutes on why: why
+      formalize at all, why formalize QEC in particular, and what already exists. Then eight words of
+      vocabulary, one code and one specification. Then the demo builds the code
+      live, and everything you see on the concept slides reappears in the editor.</aside>
+  </section>
+
+  <!-- ================= SLIDE 10 · collaboration at scale ================= -->
+  <!-- moved here from the closer 2026-09-11 (by request): the general case for formalizing
+       opens session 2, ahead of the widgets (11), the QEC-specific case (12) and the library (13). -->
+  <!-- the PFR blueprint as a designed dependency graph (not a screenshot). 1: hollow
+       graph + legend · 2: first wave of nodes turns green (✓ per the green-glyph rule) ·
+       3: the rest fills in. Chip strip removed 2026-09-02 — the graph carries it and the
+       dates/counts live in the notes; the FLT beat (was chip 4) is now spoken over the
+       finished graph. [verify] PFR ≈3 weeks / ≈25 contributors · FLT 50+ contributors. -->
+  <section class="slide" data-title="Collaboration at scale">
+    <header class="sl-head"><div class="tick"></div><h2>Collaboration at Scale</h2></header>
+
+    <div class="bp-wrap">
+      <div class="bp-legend" data-frag="1">
+        <span class="lg"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="#fff" stroke="#C9C7BD" stroke-width="1.5"/></svg>stated</span>
+        <span class="lg"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="#2F7D44"/><text x="7" y="10.5" text-anchor="middle" style="font:700 9px var(--sans)" fill="#fff">✓</text></svg>formalized — kernel-checked</span>
+      </div>
+
+      <svg width="760" height="300" viewBox="0 0 760 300" aria-label="A blueprint dependency graph: lemma nodes filling in green as they are formalized, converging on PFR">
+        <!-- the graph: edges + hollow nodes (frag 1) -->
+        <g data-frag="1">
+          <g stroke="#C9C7BD" stroke-width="1.25">
+            <line x1="70" y1="40"  x2="290" y2="62"/><line x1="70" y1="95"  x2="290" y2="62"/>
+            <line x1="70" y1="95"  x2="290" y2="125"/><line x1="70" y1="150" x2="290" y2="125"/>
+            <line x1="70" y1="150" x2="290" y2="188"/><line x1="70" y1="205" x2="290" y2="188"/>
+            <line x1="70" y1="205" x2="290" y2="251"/><line x1="70" y1="260" x2="290" y2="251"/>
+            <line x1="290" y1="62"  x2="510" y2="98"/><line x1="290" y1="125" x2="510" y2="98"/>
+            <line x1="290" y1="125" x2="510" y2="214"/><line x1="290" y1="188" x2="510" y2="214"/>
+            <line x1="290" y1="251" x2="510" y2="214"/>
+            <line x1="510" y1="98" x2="700" y2="156"/><line x1="510" y1="214" x2="700" y2="156"/>
+          </g>
+          <g fill="#fff" stroke="#C9C7BD" stroke-width="1.5">
+            <circle cx="70" cy="40" r="9"/><circle cx="70" cy="95" r="9"/><circle cx="70" cy="150" r="9"/>
+            <circle cx="70" cy="205" r="9"/><circle cx="70" cy="260" r="9"/>
+            <circle cx="290" cy="62" r="9"/><circle cx="290" cy="125" r="9"/>
+            <circle cx="290" cy="188" r="9"/><circle cx="290" cy="251" r="9"/>
+            <circle cx="510" cy="98" r="9"/><circle cx="510" cy="214" r="9"/>
+            <circle cx="700" cy="156" r="12"/>
+          </g>
+          <text x="700" y="190" text-anchor="middle" style="font:600 13px var(--mono)" fill="#545360">PFR</text>
+        </g>
+        <!-- first contributions (frag 2) -->
+        <g data-frag="2">
+          <g fill="#2F7D44"><circle cx="70" cy="40" r="9"/><circle cx="70" cy="95" r="9"/><circle cx="70" cy="150" r="9"/><circle cx="290" cy="62" r="9"/></g>
+          <g fill="#fff" text-anchor="middle" style="font:700 10px var(--sans)">
+            <text x="70" y="43.5">✓</text><text x="70" y="98.5">✓</text><text x="70" y="153.5">✓</text><text x="290" y="65.5">✓</text>
+          </g>
+        </g>
+        <!-- the rest fills in (frag 3) -->
+        <g data-frag="3">
+          <g fill="#2F7D44">
+            <circle cx="70" cy="205" r="9"/><circle cx="70" cy="260" r="9"/>
+            <circle cx="290" cy="125" r="9"/><circle cx="290" cy="188" r="9"/><circle cx="290" cy="251" r="9"/>
+            <circle cx="510" cy="98" r="9"/><circle cx="510" cy="214" r="9"/>
+            <circle cx="700" cy="156" r="12"/>
+          </g>
+          <g fill="#fff" text-anchor="middle" style="font:700 10px var(--sans)">
+            <text x="70" y="208.5">✓</text><text x="70" y="263.5">✓</text>
+            <text x="290" y="128.5">✓</text><text x="290" y="191.5">✓</text><text x="290" y="254.5">✓</text>
+            <text x="510" y="101.5">✓</text><text x="510" y="217.5">✓</text>
+          </g>
+          <text x="700" y="161" text-anchor="middle" style="font:700 13px var(--sans)" fill="#fff">✓</text>
+        </g>
+      </svg>
+
+    </div>
+
+    <aside class="notes">In November 2023, Terence Tao and three coauthors proved a
+      well-known conjecture in additive combinatorics, the Polynomial Freiman–Ruzsa conjecture. [graph]
+      Within days of the paper going up, Tao posted a Lean blueprint of the proof — a human-readable outline
+      of the argument where every lemma links to its formal counterpart, with a dependency graph. Hollow
+      nodes are stated; green nodes are formalized. Initially, nothing was proved. [first wave] People from
+      the community started picking off pieces, and each time someone finished one, the blueprint updated
+      and linked to the formalization. [all green] About three weeks later [verify], the whole proof was
+      formalized — with contributions from roughly two dozen people [verify], most of whom Tao had never
+      met. That's the point: you can build on a stranger's part of the proof because the Lean kernel has
+      already checked it. Trust doesn't have to come from knowing your collaborators. [no build — spoken
+      over the finished graph] More
+      recently, Kevin Buzzard started a project to formalize Fermat's Last Theorem — the statement you read
+      this morning; it was two lines. That project has over fifty contributors [verify] and is expected to
+      take years — nobody thinks it's close to done. But Lean is what lets an effort like that scale at
+      all. That is the general case. Now the case for QEC in particular.</aside>
+  </section>
+
+  <!-- ================= SLIDE 11 · metaprogramming and widgets ================= -->
+  <!-- restored 2026-09-11 (by request) right after the PFR slide, after a day folded into the
+       QECLean slide as a single panel. -->
+  <!-- two infoview-styled widget panels (designed, not screenshots — same idiom as the
+       slide-7 goal panel). 1: the set widget from the demo/E3 (Euler layout: s inside t,
+       s ∩ u lens lit as the hover state) · 2: the toric-code widget from my research
+       (zLoop as a Z operator, wrap stubs dotted — Z-blue per the token rules).
+       Retitled and both captions dropped 2026-09-02 — the panel labels carry the naming.
+       QECWidgets is merged to QECLean main; the toric panel is live. -->
+  <section class="slide" data-title="Metaprogramming and Widgets">
+    <header class="sl-head"><div class="tick"></div><h2>Metaprogramming and Widgets</h2></header>
+
+    <div class="wg-wrap">
+      <div class="wg-panel" data-frag="1">
+        <div class="wg-goal"><span class="hyp">h : s ⊆ t</span>
+<span class="ts">⊢</span> s ∩ u ⊆ t ∩ u</div>
+        <div class="wg-fig">
+          <svg width="372" height="190" viewBox="0 0 372 190" aria-label="Euler diagram: s drawn inside t, u overlapping both; the s-intersect-u region is highlighted">
+            <clipPath id="wg-clip-s"><circle cx="126" cy="97" r="40"/></clipPath>
+            <circle cx="212" cy="97" r="64" fill="rgba(75,56,178,.20)" clip-path="url(#wg-clip-s)"/>
+            <circle cx="150" cy="97" r="78" fill="none" stroke="#545360" stroke-width="1.5"/>
+            <circle cx="126" cy="97" r="40" fill="none" stroke="#545360" stroke-width="1.5"/>
+            <circle cx="212" cy="97" r="64" fill="none" stroke="#545360" stroke-width="1.5"/>
+            <text x="150" y="36" text-anchor="middle" style="font:600 15px var(--mono)" fill="#20222E">t</text>
+            <text x="112" y="102" text-anchor="middle" style="font:600 15px var(--mono)" fill="#20222E">s</text>
+            <text x="254" y="102" text-anchor="middle" style="font:600 15px var(--mono)" fill="#20222E">u</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="wg-panel" data-frag="2">
+        <div class="wg-goal"><span class="kw" style="color:var(--indigo);font-weight:600">#toric_chain</span> zLoop</div>
+        <div class="wg-fig">
+          <svg width="372" height="190" viewBox="0 0 372 190" aria-label="A 4 by 4 toric-code lattice; a vertical loop of edges is highlighted in Z-blue, wrapping around the torus as dotted stubs">
+            <g stroke="#E2E1DA" stroke-width="1.5">
+              <line x1="117" y1="14"  x2="255" y2="14"/><line x1="117" y1="60"  x2="255" y2="60"/>
+              <line x1="117" y1="106" x2="255" y2="106"/><line x1="117" y1="152" x2="255" y2="152"/>
+              <line x1="117" y1="14" x2="117" y2="152"/><line x1="163" y1="14" x2="163" y2="152"/>
+              <line x1="209" y1="14" x2="209" y2="152"/><line x1="255" y1="14" x2="255" y2="152"/>
+            </g>
+            <g stroke="#E2E1DA" stroke-width="1.5" stroke-dasharray="2 3">
+              <line x1="105" y1="14" x2="117" y2="14"/><line x1="105" y1="60" x2="117" y2="60"/><line x1="105" y1="106" x2="117" y2="106"/><line x1="105" y1="152" x2="117" y2="152"/>
+              <line x1="255" y1="14" x2="267" y2="14"/><line x1="255" y1="60" x2="267" y2="60"/><line x1="255" y1="106" x2="267" y2="106"/><line x1="255" y1="152" x2="267" y2="152"/>
+              <line x1="117" y1="2" x2="117" y2="14"/><line x1="209" y1="2" x2="209" y2="14"/><line x1="255" y1="2" x2="255" y2="14"/>
+              <line x1="117" y1="152" x2="117" y2="164"/><line x1="209" y1="152" x2="209" y2="164"/><line x1="255" y1="152" x2="255" y2="164"/>
+            </g>
+            <line x1="163" y1="14" x2="163" y2="152" stroke="#fff" stroke-width="7"/>
+            <line x1="163" y1="14" x2="163" y2="152" stroke="#2380C8" stroke-width="3.5"/>
+            <line x1="163" y1="2"  x2="163" y2="14"  stroke="#2380C8" stroke-width="3" stroke-dasharray="2 3"/>
+            <line x1="163" y1="152" x2="163" y2="164" stroke="#2380C8" stroke-width="3" stroke-dasharray="2 3"/>
+            <g fill="#C9C7BD">
+              <circle cx="117" cy="14" r="3"/><circle cx="163" cy="14" r="3"/><circle cx="209" cy="14" r="3"/><circle cx="255" cy="14" r="3"/>
+              <circle cx="117" cy="60" r="3"/><circle cx="163" cy="60" r="3"/><circle cx="209" cy="60" r="3"/><circle cx="255" cy="60" r="3"/>
+              <circle cx="117" cy="106" r="3"/><circle cx="163" cy="106" r="3"/><circle cx="209" cy="106" r="3"/><circle cx="255" cy="106" r="3"/>
+              <circle cx="117" cy="152" r="3"/><circle cx="163" cy="152" r="3"/><circle cx="209" cy="152" r="3"/><circle cx="255" cy="152" r="3"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <aside class="notes">Another thing I like about Lean: it's a full programming language, and you can
+      write programs that inspect the proof state itself — and, for example, render it visually. [set
+      widget] You've already seen this: the set widget from the demo [if E3 was reached: — and used, in
+      exercise 3]. I think the pedagogical implications alone are interesting — learning set-theoretic
+      proofs with an interactive visualizer is genuinely fun. [toric widget] But widgets matter for research
+      too. Here's one from QECLean — the toric code, a Z-type logical drawn on its lattice. The diagram is generated from the formal
+      object, so the figure can't drift from the theorem. A hand-drawn figure is an illustration next to a
+      claim; this is a rendering of it — faithful to the theory by construction.</aside>
+  </section>
+
+  <!-- ================= SLIDE 12 · why formalize QEC ================= -->
+  <!-- new 2026-09-11 (by request), cut to two points the same day: the slide-2 idiom (two
+       oversized lines, one click each; .obj-* reused). 1 absorbs the former Implications of
+       AI; 2 is the certificate argument (the former Reviewing Papers' core). The other three
+       reasons (definitions made precise · proved, not asserted · check the statement) left
+       the slide; keep them for the script if wanted. -->
+  <section class="slide" data-title="Why formalize QEC">
+    <header class="sl-head"><div class="tick"></div><h2>Why Formalize QEC?</h2></header>
+
+    <div class="obj-wrap">
+      <div class="obj-item" data-frag="1"><span class="obj-n">1</span><span class="obj-t">Verified discovery of new codes</span></div>
+      <div class="obj-item" data-frag="2"><span class="obj-n">2</span><span class="obj-t">Trust across the stack</span></div>
+    </div>
+
+    <aside class="notes">So why do this for QEC in particular? Two reasons. [1] AI writes; the kernel checks.
+      The folklore was that a formal proof costs an order of magnitude more than the paper proof. That is
+      changing: write the statement, hand lemma-scale goals to an agent, and it closes many of them. You
+      still own the definitions and the statements — the part that needs your expertise, not Lean
+      expertise. And the relationship flips: the results on the news slide this morning were produced by
+      AI and verified by Lean. For QEC specifically, a model can search a combinatorial space of codes and
+      gadgets; the checker is what turns "the model proposed a code" into "a code with a proved distance."
+      [2] Trust across the stack. QEC sits between physics, coding theory, decoders, compilers and
+      hardware, and the people downstream cannot check a distance proof by hand. A kernel-checked theorem
+      is a certificate they can consume without reading the proof — they read the statement, and checking
+      a statement is much cheaper than checking a proof. The rest of the stack already works this way:
+      verified quantum compilers exist, in Coq. QEC theory is the layer that has been missing.</aside>
+  </section>
+
+  <!-- ================= SLIDE 13 · QECLean ================= -->
+  <!-- new 2026-09-11 (by request), made minimal the same day: four cards, one per build —
+       stabilizer formalism · [[n, k, d]] · formalized codes · widgets. No library names; the
+       toric widget panel went back to its own slide (11) and the code chips with proved
+       distances stay after the demo (16, "Does It Scale"). -->
+  <section class="slide" data-title="QECLean">
+    <header class="sl-head"><div class="tick"></div><h2>QECLean</h2></header>
+
+    <div class="qi-wrap">
+      <div class="qi-card" data-frag="1">Stabilizer formalism</div>
+      <div class="qi-card" data-frag="2">[[<i>n</i>, <i>k</i>, <i>d</i>]]</div>
+      <div class="qi-card" data-frag="3">Formalized codes</div>
+      <div class="qi-card" data-frag="4">Widgets</div>
+    </div>
+
+    <aside class="notes">What exists already. QECLean is an open library on top of mathlib, in four parts.
+      [formalism] The stabilizer formalism — Paulis, stabilizer groups, codes, logical operators — the
+      vocabulary you are about to see, one definition at a time. [[[n, k, d]]] Distance as a
+      specification, and a code packaged together with a proof of its distance. [codes] Formalized codes
+      — Steane, the surface and toric families, IBM's gross code and more — each with a proved distance;
+      the list comes back after the demo. [widgets] And the widgets you just saw, generated from the
+      formal objects. Now the vocabulary.</aside>
+  </section>
+
+  <!-- ================= SLIDE 14 · the vocabulary ladder ================= -->
+  <!-- spotlight build (the slide-5 idiom), one noun on stage at a time, read LEFT → RIGHT: the
+       mathematical definition on the left, the QECLean definition on the right. MAXIMALLY
+       staggered (2026-09-07, by request): the noun alone · each mathematical component · the
+       Lean header (the card appears) · each Lean component, mirroring the math. Space is
+       reserved for everything, so nothing shifts. Eight rungs, 55 builds:
+         Pauli operator (4) · n-qubit Pauli operator (8 — with the two-qubit example X ⊗ Z, as an
+         explicit function `fun | 0 => X | 1 => Z` and as `P[XZ]`, since 2026-09-12; both elaborate,
+         the function form under `open PauliOperator`, and `decide` proves them equal) · Pauli group element (7) ·
+         stabilizer group (8) · stabilizer code (12 — the seven fields one per click since
+         2026-09-11) · logical operators (7) · distance (6) · stabilizer code [[n, k, d]] (3 — no
+         math column since 2026-09-11: noun · card · field) —
+       the distance rung's math is the one line `d = min { wt(g) : g nontrivial logical }`,
+       then HasCodeDistance unrolled clause by clause (the former "Reading a Specification"
+       slide, folded in here and cut). The code rung precedes the logical-operators rung
+       (swapped 2026-09-09, by request) so the ladder reads group → code → what acts on it →
+       distance → the [[n, k, d]] package: `StabilizerCodeWithDistance` (Logical/CodeDistance.lean),
+       which extends StabilizerCode with one field, `hasDistance`.
+       THE LOGICAL-OPERATORS RUNG defines what the distance clause uses (retargeted 2026-09-07):
+       the centralizer C(S), "logical ⇔ in C(S)", "nontrivial ⇔ not a stabilizer up to phase"; on
+       the right QECLean's `centralizer` (mathlib's, of the underlying subgroup) and
+       `IsNontrivialLogicalOperator` spelled out as its two conjuncts (the former middle one,
+       `g ∉ S.toSubgroup`, dropped 2026-09-09 by request: it follows from the operator-part
+       clause with s := g; QECLean is being refactored to match) — the source routes
+       through `RepresentsNontrivialCoset`, to which the conjunction is definitionally equal
+       (`IsNontrivialLogicalOperator_iff … := Iff.rfl`). LogicalQubitOps (the X̄/Z̄ pair) left the
+       deck with the logical fields.
+       THE STABILIZER CODE RUNG OMITS THE LOGICAL OPERATORS (2026-09-07, by request): the
+       textbook definition is the stabilizer group given by n − k independent commuting
+       generators without −I, and that is what both columns show. QECLean's actual
+       `StabilizerCode` carries two more fields — `logicalOps : Fin k → LogicalQubitOps n (…)`
+       and `logical_commute_cross` — a chosen logical basis that transversal gates and
+       concatenation need. [decide] before the talk: refactor the library to match the slide
+       (bare StabilizerCode + a separate LogicalBasis), or pre-fill those two fields in the
+       demo file below the cut line and say so (the notes do).
+       Display forms vs source (Steane7Cleanup checkout): `deriving DecidableEq` dropped on
+       PauliOperator; StabilizerGroup.is_abelian written with arrows instead of the anonymous
+       `(_ : g ∈ toSubgroup)` binders and `StabilizerGroup.negIdentity` → `negIdentity`;
+       `NQubitPauliGroupElement.Anticommute/AllPhaseZero/listToSet` prefixes dropped; long lines
+       re-wrapped (HasCodeDistance clauses 2 and 3). [verify] against the pin — or align the
+       source to these spellings so the demo's hovers match. -->
+  <section class="slide" data-title="The vocabulary ladder">
+    <header class="sl-head"><div class="tick"></div><h2>QEC Primitives in Lean</h2></header>
+
+    <div class="spot-stack">
+      <div class="spot" data-frag="1" data-frag-until="4">
+        <div class="vl-noun">Pauli operator</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 30%"><div data-frag="2"><i>P</i> ∈ {I, X, Y, Z}</div></div>
+          <div class="code-card vl-card" style="font-size:23px" data-frag="3"><span class="kw">inductive</span> PauliOperator : Type<span class="ln" data-frag="4">  | I : PauliOperator
+  | X : PauliOperator
+  | Y : PauliOperator
+  | Z : PauliOperator</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="5" data-frag-until="12">
+        <div class="vl-noun">n-qubit Pauli operator</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 30%"><div data-frag="6"><i>P</i> = <i>P</i>₁ ⊗ <i>P</i>₂ ⊗ ⋯ ⊗ <i>P</i>ₙ</div><div data-frag="7"><i>P</i>ᵢ ∈ {I, X, Y, Z}</div><div data-frag="8"><span class="dim">e.g.</span>  X ⊗ Z</div></div>
+          <div class="code-card vl-card" style="font-size:21px" data-frag="9"><span class="kw">def</span> NQubitPauliOperator (n : ℕ) : Type :=<span class="ln" data-frag="10">  Fin n → PauliOperator</span><span class="ln" data-frag="11">
+<span class="kw">example</span> : NQubitPauliOperator 2 := <span class="kw">fun</span> | 0 => X | 1 => Z</span><span class="ln" data-frag="12"><span class="kw">example</span> : NQubitPauliOperator 2 := P[XZ]</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="13" data-frag-until="19">
+        <div class="vl-noun">Pauli group element</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 30%"><div data-frag="14"><i>g</i> = i<sup><i>k</i></sup> · <i>P</i>₁ ⊗ ⋯ ⊗ <i>P</i>ₙ</div><div data-frag="15"><i>k</i> ∈ {0, 1, 2, 3}</div><div data-frag="16"><span class="dim">the Pauli group 𝒫ₙ</span></div></div>
+          <div class="code-card vl-card" style="font-size:21px" data-frag="17"><span class="kw">structure</span> NQubitPauliGroupElement (n : ℕ) <span class="kw">where</span><span class="ln" data-frag="18">  phasePower : Fin 4  <span class="cm">-- 0 → 1, 1 → i, 2 → -1, 3 → -i</span></span><span class="ln" data-frag="19">  operators : NQubitPauliOperator n</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="20" data-frag-until="27">
+        <div class="vl-noun">stabilizer group</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 30%"><div data-frag="21"><i>S</i> ≤ 𝒫ₙ</div><div data-frag="22"><i>gh</i> = <i>hg</i>  for all <i>g</i>, <i>h</i> ∈ <i>S</i></div><div data-frag="23">−I ∉ <i>S</i></div></div>
+          <div class="code-card vl-card" style="font-size:19px" data-frag="24"><span class="kw">structure</span> StabilizerGroup (n : ℕ) <span class="kw">where</span><span class="ln" data-frag="25">  toSubgroup : Subgroup (NQubitPauliGroupElement n)</span><span class="ln" data-frag="26">  is_abelian : ∀ g h, g ∈ toSubgroup → h ∈ toSubgroup →
+    g * h = h * g</span><span class="ln" data-frag="27">  no_neg_identity : negIdentity n ∉ toSubgroup</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="28" data-frag-until="39">
+        <div class="vl-noun">stabilizer code [[<i>n</i>, <i>k</i>]]</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 27%;font-size:24px"><div data-frag="29"><i>g</i>₁, …, <i>g</i>ₙ₋ₖ ∈ 𝒫ₙ</div><div data-frag="30">independent, pairwise commuting</div><div data-frag="31"><i>S</i> = ⟨<i>g</i>₁, …, <i>g</i>ₙ₋ₖ⟩,  −I ∉ <i>S</i></div></div>
+          <div class="code-card vl-card" style="font-size:18px" data-frag="32"><span class="kw">structure</span> StabilizerCode (n k : ℕ) <span class="kw">where</span><span class="ln" data-frag="33">  hk : k ≤ n</span><span class="ln" data-frag="34">  generatorsList : List (NQubitPauliGroupElement n)</span><span class="ln" data-frag="35">  generators_length : generatorsList.length = n - k</span><span class="ln" data-frag="36">  generators_phaseZero : AllPhaseZero generatorsList</span><span class="ln" data-frag="37">  generators_independent : GeneratorsIndependent n generatorsList</span><span class="ln" data-frag="38">  generators_commute : ∀ g ∈ listToSet generatorsList,
+    ∀ h ∈ listToSet generatorsList, g * h = h * g</span><span class="ln" data-frag="39">  closure_no_neg_identity :
+    negIdentity n ∉ Subgroup.closure (listToSet generatorsList)</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="40" data-frag-until="46">
+        <div class="vl-noun">logical operators</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 40%;font-size:24px"><div data-frag="41"><i>C</i>(<i>S</i>) = { <i>g</i> ∈ 𝒫ₙ : <i>gs</i> = <i>sg</i>  ∀ <i>s</i> ∈ <i>S</i> }</div><div data-frag="42"><i>g</i> logical  ⇔  <i>g</i> ∈ <i>C</i>(<i>S</i>)</div><div data-frag="43"><i>g</i> nontrivial  ⇔  i<sup><i>k</i></sup><i>g</i> ∉ <i>S</i>  for all <i>k</i></div></div>
+          <div class="code-card vl-card" style="font-size:17px" data-frag="44"><span class="kw">noncomputable def</span> centralizer (S : StabilizerGroup n) :
+    Subgroup (NQubitPauliGroupElement n) :=
+  Subgroup.centralizer
+    (S.toSubgroup : Set (NQubitPauliGroupElement n))<span class="ln" data-frag="45">
+<span class="kw">def</span> IsNontrivialLogicalOperator
+    (g : NQubitPauliGroupElement n)
+    (S : StabilizerGroup n) : Prop :=
+  g ∈ centralizer S ∧</span><span class="ln" data-frag="46">  ∀ s ∈ S.toSubgroup, s.operators ≠ g.operators</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="47" data-frag-until="52">
+        <div class="vl-noun">distance</div>
+        <div class="vl-row">
+          <div class="vl-math" style="flex:0 0 38%;font-size:23px"><div data-frag="48"><i>d</i> = min { wt(<i>g</i>) : <i>g</i> nontrivial logical }</div></div>
+          <div class="code-card vl-card" style="font-size:17px" data-frag="49"><span class="kw">def</span> HasCodeDistance (C : StabilizerCode n k) (d : ℕ) : Prop :=<span class="ln" data-frag="50">  d ≥ 1 ∧</span><span class="ln" data-frag="51">  (∀ g, IsNontrivialLogicalOperator g C.toStabilizerGroup →
+      0 &lt; weight g → weight g ≥ d) ∧</span><span class="ln" data-frag="52">  (∃ g, IsNontrivialLogicalOperator g C.toStabilizerGroup ∧
+      weight g = d)</span></div>
+        </div>
+      </div>
+      <div class="spot" data-frag="53">
+        <div class="vl-noun">stabilizer code [[<i>n</i>, <i>k</i>, <i>d</i>]]</div>
+        <div class="vl-row">
+          <div class="code-card vl-card" style="font-size:19px" data-frag="54"><span class="kw">structure</span> StabilizerCodeWithDistance (n k d : ℕ)
+    <span class="kw">extends</span> StabilizerCode n k <span class="kw">where</span><span class="ln" data-frag="55">  hasDistance : HasCodeDistance toStabilizerCode d</span></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="notes">Seven nouns and one predicate carry all of stabilizer error correction, and each is
+      a definition in QECLean. For each: the mathematics first, one piece at a time, then the Lean, one
+      field at a time. [Pauli operator] A single-qubit Pauli — [math] one of I, X, Y, Z. [Lean] An
+      inductive type — [constructors] with four constructors. That is the whole definition. [n-qubit
+      operator] [math] A tensor product of n of them, [math] each an I, X, Y or Z — [math] for instance X on
+      the first qubit and Z on the second. [Lean] A definition — [body] a function from qubit index to
+      Pauli. [example] And that operator written down as one: qubit zero gets X, qubit one gets Z.
+      [notation] Or with the library's notation, which means exactly the same thing: P for a bare Pauli
+      string, then the letters, one per qubit. The σ[ZZZIZII] you'll see in the editor is this notation
+      with a phase in front — a group element, the next rung. [group
+      element] [math] Multiply by a phase, [math] one of four, [math] and you have an element of the Pauli
+      group. [Lean] A structure — [phasePower] the phase, as a number mod 4, [operators] and the string.
+      [stabilizer group] [math] A subgroup of the Pauli group, [math] abelian, [math] not containing minus
+      the identity. [Lean] A structure — [toSubgroup] the subgroup, [is_abelian] the abelian condition —
+      the theorem you just read — [no_neg_identity] and the exclusion of −I. [stabilizer code] Now the definition you know. [math] n − k generators, [math] independent and pairwise
+      commuting, [math] generating a group that does not contain −I. That's it — the code is its
+      stabilizer group. [Lean] The structure you will watch me fill in for Steane, one field at a time — [hk] k at most n,
+      [generatorsList] the generator list, [length] with n − k entries, [phaseZero] each with phase one,
+      [independent] independent, [commute] pairwise commuting, [no −I] and no minus identity in the group
+      they generate. The field names are the checklist. One honest footnote for the demo: the library's
+      structure also asks for a chosen logical basis — an X̄ and Z̄ per logical qubit — because the
+      transversal-gate and concatenation theorems need one. That is packaging, not definition, and I've
+      prepared it. [logical operators] [math]
+      The centralizer of S: everything that commutes with every stabilizer. [math] A logical operator is
+      an element of the centralizer — it preserves the code space. [math] It is nontrivial when it is not
+      itself a stabilizer, even up to a phase. [Lean] The centralizer, which is mathlib's centralizer of
+      the underlying subgroup. [IsNontrivial] And the predicate you will see inside the distance
+      definition: in the centralizer — [phase] and no stabilizer has the same Pauli
+      string, which is "not in S up to phase". Every name in the distance clause is now defined.
+      [distance] Now distance. [math] The minimum weight of a nontrivial logical operator
+      — weight meaning the number of qubits it touches, and nontrivial meaning it commutes with S but is
+      not itself a stabilizer up to phase. [Lean] Now the specification — the part I want you to be able to
+      read and judge. [d ≥ 1] Distance is at least one. [∀] Every nontrivial logical operator of positive
+      weight has weight at least d — "minimum" as a lower bound. And notice the extra condition, zero less
+      than the weight of g: it excludes weight-zero elements. Is it needed, given how "nontrivial" is
+      defined on the left? That is exactly the question a referee should ask — a question about error
+      correction, not about Lean. [∃] And some nontrivial logical operator has weight exactly d —
+      "minimum" as attained. Every noun in the textbook is a def; every condition is a field or a clause.
+      That is the whole trick, and checking that the clauses say what the left-hand side says is your
+      expertise, not Lean expertise. [[[n, k, d]]] And the package — this one has no textbook sentence, because it is packaging. [Lean] A
+      structure that extends StabilizerCode — every field of the
+      code, [hasDistance] plus one more: a proof that the code has distance d. All three parameters in the
+      type. The Steane file ends by building one of these, so distance three is not a claim in a comment
+      but a field the kernel has checked.</aside>
+  </section>
+
+  <!-- ================= SLIDE 15 · the Steane code ================= -->
+  <!-- the instance, built the way the textbook builds it (2026-09-07, by request): start
+       classical. 1: the parity-check matrix H of the [7,4,3] Hamming code (1s in ink, 0s muted,
+       square brackets) · 2: its rows read as Pauli strings with 1 ↦ Z — the three Z-checks ·
+       3: the same rows with 1 ↦ X — the three X-checks (the CSS construction; H H^T = 0 because
+       every pair of rows overlaps evenly) · 4: [[7, 1, 3]] with the 3 in indigo — distance is a
+       claim here; the ladder's distance rung (14) defined it, and the demo's last beat picks it
+       up. The logical X̄/Z̄ row was removed 2026-09-07 (by request, with the logical fields
+       leaving the code definition on slide 14). Z-blue and X-red are carried by the letters
+       themselves (never color-alone); I and 0 muted. Strings match QECLean's Steane7.lean
+       (σ[ZZZIZII] …); the matrix is the one thing on this slide that does not reappear in the
+       editor — it says where those literals come from. -->
+  <section class="slide" data-title="The Steane code">
+    <header class="sl-head"><div class="tick"></div><h2>The Steane Code</h2></header>
+
+    <div class="st-wrap">
+      <div class="st-row">
+        <div class="st-col st-mat" data-frag="1">
+          <div class="st-p"><b class="b1">1</b><b class="b1">1</b><b class="b1">1</b><span class="b0">0</span><b class="b1">1</b><span class="b0">0</span><span class="b0">0</span></div>
+          <div class="st-p"><b class="b1">1</b><b class="b1">1</b><span class="b0">0</span><b class="b1">1</b><span class="b0">0</span><b class="b1">1</b><span class="b0">0</span></div>
+          <div class="st-p"><b class="b1">1</b><span class="b0">0</span><b class="b1">1</b><b class="b1">1</b><span class="b0">0</span><span class="b0">0</span><b class="b1">1</b></div>
+        </div>
+        <div class="st-col" data-frag="2">
+          <div class="st-p"><b class="pz">Z</b><b class="pz">Z</b><b class="pz">Z</b><span class="pi">I</span><b class="pz">Z</b><span class="pi">I</span><span class="pi">I</span></div>
+          <div class="st-p"><b class="pz">Z</b><b class="pz">Z</b><span class="pi">I</span><b class="pz">Z</b><span class="pi">I</span><b class="pz">Z</b><span class="pi">I</span></div>
+          <div class="st-p"><b class="pz">Z</b><span class="pi">I</span><b class="pz">Z</b><b class="pz">Z</b><span class="pi">I</span><span class="pi">I</span><b class="pz">Z</b></div>
+        </div>
+        <div class="st-col" data-frag="3">
+          <div class="st-p"><b class="px">X</b><b class="px">X</b><b class="px">X</b><span class="pi">I</span><b class="px">X</b><span class="pi">I</span><span class="pi">I</span></div>
+          <div class="st-p"><b class="px">X</b><b class="px">X</b><span class="pi">I</span><b class="px">X</b><span class="pi">I</span><b class="px">X</b><span class="pi">I</span></div>
+          <div class="st-p"><b class="px">X</b><span class="pi">I</span><b class="px">X</b><b class="px">X</b><span class="pi">I</span><span class="pi">I</span><b class="px">X</b></div>
+        </div>
+      </div>
+      <div class="st-params" data-frag="4">[[7, 1, <span class="st-d">3</span>]]</div>
+    </div>
+
+    <aside class="notes">The instance: the Steane code, built the way the textbook builds it. [H] Start
+      classical. This is the parity-check matrix of the [7,4,3] Hamming code — three rows, seven columns,
+      and the columns are the seven nonzero vectors of length three; that is what gives the classical code
+      distance three. [Z rows] Now read each row as a Pauli string: a 1 becomes Z, a 0 becomes I. Three
+      Z-checks. [X rows] Do it again with X. Three X-checks. That is the CSS construction, and it works
+      here because every pair of rows of H overlaps in an even number of places — so every Z-check
+      commutes with every X-check. In a minute the kernel will check that rather than take my word for
+      it. [parameters] Six generators on seven qubits leave one logical qubit — and distance three, which
+      for now is a claim. Hold on to that 3.</aside>
+  </section>
+
+  <!-- ================= SLIDE 16 · does it scale ================= -->
+  <!-- the scope claim (retitled from "What QECLean Covers" 2026-09-11; the library's shape
+       now opens the session on 13; the anatomy slide between the ladder and Steane was cut
+       2026-09-11) — the concept slide that does not reappear in the editor. Four
+       parameter chips, one per build, small to large (2026-09-07, by request: cut from eleven,
+       then the iceberg dropped too, and staggered): 1: Steane [[7,1,3]], the code just built ·
+       2: rotated surface codes, distance exactly L ·
+       3: toric codes, distance exactly L · 4: IBM's gross code, distance exactly 12. The third
+       number is the proved distance. Read off the Steane7Cleanup checkout 2026-09-07 — [verify]
+       per-code status against the pinned commit. The other bundled codes ([[3,1,1]] · [[4,1,2]]
+       · [[4,2,2]] · [[5,1,3]] · [[6,2,2]] · the iceberg family · the [[49,1,9]] concatenation)
+       are spoken, not shown. -->
+  <section class="slide" data-title="Does it scale">
+    <header class="sl-head"><div class="tick"></div><h2>Does It Scale?</h2></header>
+
+    <div class="cv-wrap">
+      <div class="cv-row">
+        <div class="cv-chip" data-frag="1"><div class="cv-p">[[7, 1, 3]]</div><div class="cv-n">Steane</div></div>
+        <div class="cv-chip" data-frag="2"><div class="cv-p">[[L², 1, L]]</div><div class="cv-n">rotated surface</div></div>
+        <div class="cv-chip" data-frag="3"><div class="cv-p">[[2L², 2, L]]</div><div class="cv-n">toric</div></div>
+        <div class="cv-chip" data-frag="4"><div class="cv-p">[[144, 12, 12]]</div><div class="cv-n">gross code</div></div>
+      </div>
+    </div>
+
+    <aside class="notes">Does this scale past toy codes? Here is what is in the library today, smallest to
+      largest — the third number is always a proved distance, not an asserted one. [Steane] The code you
+      just built, and beyond the distance its transversal Hadamard and S gate are verified as logical
+      gates. [rotated surface] Rotated surface codes for every lattice size, with distance exactly L.
+      [toric] Toric codes likewise, with distance exactly L. [gross] And IBM's gross
+      code, with distance exactly twelve. There is more in the library — the five-qubit code, the
+      [[4,2,2]] you'll meet in the exercises, the iceberg family, Steane concatenated with itself — but
+      these four are the shape of it. ([verify] per-code status before the day.)</aside>
+  </section>
+
+  <!-- ================= SLIDE 17 · exercises ================= -->
+  <!-- uw.html's setup-slide idiom (2026-09-02): the repo link alone, up the moment you land, and
+       it holds on screen through the exercise block. Formats live in the files and the script:
+       (a) match an English claim to the Lean statement that says it · (b) write the English for
+       a Lean statement · (c) fill in Code[[4, 2, 2]]. [verify] Tutorial/Session2 exists in the
+       repo, and the Codespaces image carries QECLight if (c) ships. -->
+  <section class="slide" data-title="Exercises">
+    <header class="sl-head"><div class="tick"></div><h2>Exercises</h2></header>
+
+    <div class="ex-wrap">
+      <a class="su-link" href="https://github.com/Stavan-Jain/lean-exercises">github.com<span
+        class="su-path">/Stavan-Jain/lean-exercises</span></a>
+      <div class="ex-path">Tutorial/Session2</div>
+    </div>
+
+    <aside class="notes">The afternoon exercises are in the same repo you set up this morning, under
+      Tutorial/Session2. Three formats, and none of them asks you to write a proof from scratch: match an
+      English claim about a code to the Lean statement that says it; write the English for a Lean
+      statement; and fill in the [[4,2,2]] code the way we just did Steane — two generators, and decide
+      does the work. Solutions are in the folder next to them. ([verify] helpers in the room.)</aside>
+  </section>
+
+  <!-- ================= SLIDE 18 · the certificate ================= -->
+  <!-- the closer, cut to one card 2026-09-11 (by request; the former 16–20 folded into 11–13).
+       1: the type the demo built, the distance in indigo as on the Steane slide · 2: the
+       news slide's "⊢ IN LEAN" stamp lands on it. Callback to reason 2 on slide 12. -->
+  <section class="slide" data-title="The certificate">
+    <header class="sl-head"><div class="tick"></div><h2>The Certificate</h2></header>
+
+    <div class="ct-wrap">
+      <div class="ct-card" data-frag="1">StabilizerCodeWithDistance 7 1 <span class="ct-d">3</span><span class="nw-stamp" data-frag="2"><span class="nw-stamp-in"><span class="ts-g">⊢</span>IN LEAN</span></span></div>
+    </div>
+
+    <aside class="notes">One thing to take home. [type] This is the type the demo built: a stabilizer code on
+      seven qubits encoding one, with distance three — and the three is a field, not a comment. Whoever
+      consumes it — a decoder team, a compiler, a referee, a model — reads three numbers and the
+      definition behind the third, and never the proof. That is the trust argument from the start of the
+      session, and now you have seen what is inside it. [stamp] The same stamp as this morning's
+      headlines: it is the one scoreboard everyone in the stack can trust.</aside>
+  </section>
+
+  <!-- ================= SLIDE 19 · keep going ================= -->
+  <!-- the last slide (thank-you cut 2026-09-02 — this one holds during questions).
+       Resources as four lanes (slide-0 idiom; QECLean added for this deck), two builds. Stripped 2026-09-02: lanes
+       flattened (no highlight border, no "start here" badge, no sublines), QR dropped
+       (2026-09-02; the QR left the deck entirely 2026-09-11), first-step card dropped — four names on screen, the
+       rest spoken. 1: lanes · 2: the contact line, bottom-right — it lands after the
+       three names and then holds through questions. -->
+  <section class="slide" data-title="Resources">
+    <header class="sl-head"><div class="tick"></div><h2>Resources</h2></header>
+
+    <div class="kg-wrap">
+      <div class="kg-left">
+        <div data-frag="1">
+          <div class="lane" style="margin-bottom:14px">
+            <div class="lane-t">Natural Number Game</div>
+          </div>
+          <div class="lane" style="margin-bottom:14px">
+            <div class="lane-t">Mathematics in Lean</div>
+          </div>
+          <div class="lane" style="margin-bottom:14px">
+            <div class="lane-t">Lean Zulip</div>
+          </div>
+          <div class="lane">
+            <div class="lane-t">QECLean</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kg-mail" data-frag="2">sjain298@wisc.edu</div>
+
+    <aside class="notes">Finally, if you want to keep going: [lanes] play the Natural Number Game — it runs
+      in the browser, nothing to install. Work through Mathematics in Lean, the textbook I took a lot of
+      today's exercises from. And join the Lean Zulip, the community chat — beginners get real answers
+      there. And QECLean itself — everything this afternoon came from it, and the blueprint's dependency graph is
+      the quickest way in. All of these links, plus today's slides and exercises, are on the tutorial site — the same
+      one you scanned for setup. And if you want a concrete first step: formalize the statement of one
+      lemma from a paper you've written. Just the statement — that's already a contribution, and it's
+      the part only you can do. That's all I have for today — if you have questions, or just want to
+      chat about Lean, I'm happy to stick around. [email] My address is on the slide.</aside>
+  </section>
+
+</div>
+
+<!-- overlays -->
+<div class="overlay" id="notesOv" hidden>
+  <h3 id="notesTitle">Speaker notes</h3>
+  <div id="notesBody"></div>
+</div>
+<div class="overlay" id="helpOv" hidden>
+  <h3>Keys</h3>
+  <table>
+    <tr><td><kbd>←</kbd> <kbd>→</kbd> / clicker</td><td>previous · next (steps through builds)</td></tr>
+    <tr><td><kbd>Home</kbd> <kbd>End</kbd></td><td>first · last slide</td></tr>
+    <tr><td><kbd>N</kbd></td><td>speaker notes (your draft script)</td></tr>
+    <tr><td><kbd>F</kbd></td><td>fullscreen</td></tr>
+    <tr><td><kbd>⌘P</kbd></td><td>export PDF (one page per slide)</td></tr>
+    <tr><td><kbd>?</kbd> <kbd>Esc</kbd></td><td>toggle · close this help</td></tr>
+  </table>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  // slide numbers: injected, so adding/reordering slides never leaves a stale one behind
+  slides.forEach((s, i) => {
+    if (s.classList.contains('s-title')) return;
+    const n = document.createElement('div');
+    n.className = 'sl-num';
+    n.textContent = i + 1;
+    s.appendChild(n);
+  });
+  const stage = document.getElementById('stage');
+  const notesOv = document.getElementById('notesOv');
+  const helpOv  = document.getElementById('helpOv');
+  const notesTitle = document.getElementById('notesTitle');
+  const notesBody  = document.getElementById('notesBody');
+  let cur = 0, curFrag = 0;
+
+  function clamp(i){ return Math.max(0, Math.min(slides.length - 1, i)); }
+  const fragEls = s => [...s.querySelectorAll('[data-frag]')];
+  const maxFrag = s => fragEls(s).reduce((m, el) => Math.max(m, +el.dataset.frag || 0), 0);
+
+  function applyFrags(instant){
+    if (instant) stage.classList.add('instant');
+    fragEls(slides[cur]).forEach(el => {
+      const lo = +el.dataset.frag;
+      const hi = el.dataset.fragUntil ? +el.dataset.fragUntil : Infinity;
+      el.classList.toggle('on', curFrag >= lo && curFrag <= hi);
+    });
+    if (instant) { void stage.offsetWidth; stage.classList.remove('instant'); }
+  }
+  // mode 'left': entering forward → builds start hidden · 'right'/'jump': fully built
+  function go(i, mode){
+    cur = clamp(i);
+    slides.forEach((s, j) => s.classList.toggle('current', j === cur));
+    curFrag = mode === 'left' ? 0 : maxFrag(slides[cur]);
+    applyFrags(true);
+    history.replaceState(null, '', '#' + (cur + 1));
+    if (!notesOv.hidden) renderNotes();
+  }
+  function next(){
+    if (curFrag < maxFrag(slides[cur])) { curFrag++; applyFrags(false); }
+    else if (cur < slides.length - 1) go(cur + 1, 'left');
+  }
+  function prev(){
+    if (curFrag > 0) { curFrag--; applyFrags(false); }
+    else if (cur > 0) go(cur - 1, 'right');
+  }
+  function renderNotes(){
+    const s = slides[cur];
+    const a = s.querySelector('.notes');
+    notesTitle.textContent = 'Speaker notes · slide ' + (cur + 1) + ' / ' + slides.length +
+      (s.dataset.title ? ' — ' + s.dataset.title : '');
+    notesBody.innerHTML = a ? a.innerHTML : '<em>(no notes)</em>';
+  }
+  function setScale(){
+    const s = Math.min(innerWidth / 1280, innerHeight / 720);
+    document.documentElement.style.setProperty('--s', s);
+  }
+
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ':
+        e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        e.preventDefault(); prev(); break;
+      case 'Home': e.preventDefault(); go(0, 'left'); break;
+      case 'End':  e.preventDefault(); go(slides.length - 1, 'jump'); break;
+      case 'n': case 'N':
+        notesOv.hidden = !notesOv.hidden; if (!notesOv.hidden) renderNotes(); break;
+      case 'f': case 'F':
+        document.fullscreenElement ? document.exitFullscreen()
+                                   : document.documentElement.requestFullscreen();
+        break;
+      case '?': case 'h': case 'H':
+        helpOv.hidden = !helpOv.hidden; break;
+      case 'Escape':
+        notesOv.hidden = true; helpOv.hidden = true; break;
+    }
+  });
+  addEventListener('resize', setScale);
+  addEventListener('hashchange', () => go((parseInt(location.hash.slice(1), 10) || 1) - 1, 'jump'));
+
+  setScale();
+  go((parseInt(location.hash.slice(1), 10) || 1) - 1, 'jump');
+
+  // ?handout → every slide fully built with its speaker notes beneath, one per page
+  if (new URLSearchParams(location.search).has('handout')) {
+    document.body.classList.add('handout');
+    const st = document.createElement('style');
+    st.textContent = '@page{size:1280px 1120px;margin:0}';
+    document.head.appendChild(st);
+  }
+</script>
+</body>
+</html>
